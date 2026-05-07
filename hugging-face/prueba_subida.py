@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(ROOT, 'google-earth'))
 
 from logger import get_logger  # type: ignore[reportMissingImports]
 from config import (  # type: ignore[reportMissingImports]
-    PROJECT_ID, CALI, FUENTES, DISPONIBILIDAD, ESCALA_OVERRIDE,
+    PROJECT_ID, CALI, FUENTES, DISPONIBILIDAD, ESCALA_OVERRIDE, BANDAS_UTILES,
 )
 from _apilar import apilar_bandas  # type: ignore[reportMissingImports]
 
@@ -73,7 +73,9 @@ for fuente in FUENTES:
         fuente, primera.select(0).projection().nominalScale().getInfo()
     )
     img_id = primera.get('system:index').getInfo()
-    bandas = primera.bandNames().getInfo() or []
+    disponibles = primera.bandNames().getInfo() or []
+    filtro = BANDAS_UTILES.get(fuente)
+    bandas = [b for b in filtro if b in disponibles] if filtro else disponibles
 
     log.info(f">>> {fuente}  (escala {escala_m:.1f} m/px, {len(bandas)} bandas)")
     log.info(f"  Imagen {img_id}")

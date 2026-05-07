@@ -23,9 +23,10 @@ sys.path.insert(0, os.path.join(ROOT, 'google-earth'))
 
 from logger import get_logger  # type: ignore[reportMissingImports]
 from config import (  # type: ignore[reportMissingImports]
-    PROJECT_ID, CALI, FUENTES, DISPONIBILIDAD, ESCALA_OVERRIDE,
+    PROJECT_ID, CALI, FUENTES, DISPONIBILIDAD, ESCALA_OVERRIDE, BANDAS_UTILES,
 )
 from _apilar import apilar_bandas  # type: ignore[reportMissingImports]
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 BYTES_DTYPE = {
     'int8': 1, 'uint8': 1, 'int16': 2, 'uint16': 2,
@@ -37,6 +38,7 @@ MAX_BATCH_BYTES = 8 * 1024**3
 MIN_DISCO_LIBRE_GB = 5
 COMMITS_POR_HORA = 110
 SEGUNDOS_ENTRE_COMMITS = 3600 / COMMITS_POR_HORA
+MAX_WORKERS = 16
 
 log = get_logger('subida_masiva')
 load_dotenv()
@@ -82,15 +84,17 @@ def info_fuente(fuente):
                .filterDate(*DISPONIBILIDAD[fuente])
                .first())
     info = primera.getInfo()
-    bandas = info.get('bands', [])
+    todas = info.get('bands', [])
+    bandas_keep = bandas_efectivas(fuente, primera)
+    bandas_meta = [b for b in todas if b['id'] in bandas_keep]
     nominal = primera.select(0).projection().nominalScale().getInfo()
     escala_m = ESCALA_OVERRIDE.get(fuente, nominal)
     bytes_px = sum(
         BYTES_DTYPE.get(b.get('data_type', {}).get('precision', ''), 4)
-        for b in bandas
+        for b in bandas_meta
     )
     pixeles = math.ceil(ancho_m / escala_m) * math.ceil(alto_m / escala_m)
-    return escala_m, pixeles * bytes_px
+    return escala_m, pixeles * bytes_px, bandas_keep
 
 
 def listar_ids(fuente):
@@ -109,14 +113,22 @@ def hacer_batches(ids, peso_img):
     return [ids[i:i+n] for i in range(0, len(ids), n)]
 
 
-def descargar_imagen_por_bandas(fuente, img_id, escala_m, raw_dir):
-    imagen = ee.Image(f"{fuente}/{img_id}").clip(region)
-    bandas = imagen.bandNames().getInfo() or []
-    for banda in bandas:
-        destino = os.path.join(raw_dir, f'{img_id}__{banda}.tif')
-        if os.path.exists(destino):
-            continue
-        url = imagen.select(banda).getDownloadURL({
+def bandas_efectivas(fuente, primera_imagen):
+    disponibles = primera_imagen.bandNames().getInfo() or []
+    filtro = BANDAS_UTILES.get(fuente)
+    if not filtro:
+        return disponibles
+    return [b for b in filtro if b in disponibles]
+
+
+def _bajar_una(args):
+    fuente, img_id, banda, escala_m, raw_dir = args
+    destino = os.path.join(raw_dir, f'{img_id}__{banda}.tif')
+    if os.path.exists(destino):
+        return img_id, banda, True
+    try:
+        imagen = ee.Image(f"{fuente}/{img_id}").select(banda).clip(region)
+        url = imagen.getDownloadURL({
             'region': region,
             'scale': escala_m,
             'crs': 'EPSG:4326',
@@ -126,36 +138,81 @@ def descargar_imagen_por_bandas(fuente, img_id, escala_m, raw_dir):
         r.raise_for_status()
         with open(destino, 'wb') as f:
             f.write(r.content)
-    return bandas
+        return img_id, banda, True
+    except Exception as e:
+        log.warning(f"    skip {img_id}__{banda}: {e}")
+        return img_id, banda, False
+
+
+def descargar_lote(fuente, ids, bandas, escala_m, raw_dir):
+    tareas = [(fuente, i, b, escala_m, raw_dir) for i in ids for b in bandas]
+    completas_por_img = {i: 0 for i in ids}
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
+        futuros = [ex.submit(_bajar_una, t) for t in tareas]
+        with tqdm(total=len(tareas), desc='    bandas', unit='b', leave=False) as pbar:
+            for f in as_completed(futuros):
+                img_id, _, ok = f.result()
+                if ok:
+                    completas_por_img[img_id] += 1
+                pbar.update(1)
+    return [i for i, n in completas_por_img.items() if n == len(bandas)]
 
 
 def construir_zarr_batch(raw_dir, zarr_path):
+    import numpy as np
+    import dask.array as darr
+    import rasterio
+    from dask import delayed
+
     por_imagen = {}
-    for fname in sorted(os.listdir(raw_dir)):
+    for fname in os.listdir(raw_dir):
         if not fname.endswith('.tif') or '__' not in fname:
             continue
         img_id, resto = fname.split('__', 1)
         banda = resto[:-4]
         por_imagen.setdefault(img_id, {})[banda] = os.path.join(raw_dir, fname)
+    if not por_imagen:
+        return
 
-    datasets = []
-    for img_id in sorted(por_imagen):
-        arrs = {}
-        for banda, path in por_imagen[img_id].items():
-            da = rioxarray.open_rasterio(path)
-            if isinstance(da, list):
-                da = da[0]
-            arrs[banda] = da.squeeze('band', drop=True)
-        ds = xr.Dataset(arrs).expand_dims(time=[img_id])
-        datasets.append(ds)
-    xr.concat(datasets, dim='time').to_zarr(zarr_path, mode='w', consolidated=True, zarr_format=2)
+    img_ids = sorted(por_imagen)
+    bandas = sorted({b for d in por_imagen.values() for b in d})
+
+    sample_path = next(iter(por_imagen[img_ids[0]].values()))
+    sample = rioxarray.open_rasterio(sample_path)
+    if isinstance(sample, list):
+        sample = sample[0]
+    sample = sample.squeeze('band', drop=True)
+    H, W = sample.shape
+    coords = {'time': img_ids, 'y': sample.y.values, 'x': sample.x.values}
+
+    @delayed
+    def _read(path):
+        if path is None:
+            return np.full((H, W), np.nan, dtype='float32')
+        with rasterio.open(path) as src:
+            return src.read(1).astype('float32')
+
+    bytes_por_img = H * W * 4
+    time_chunk = max(1, 256 * 1024**2 // max(bytes_por_img, 1))
+
+    arrays = {}
+    for banda in bandas:
+        rows = [darr.from_delayed(_read(por_imagen[i].get(banda)),
+                                  shape=(H, W), dtype='float32')
+                for i in img_ids]
+        stacked = darr.stack(rows, axis=0).rechunk((time_chunk, -1, -1))
+        arrays[banda] = (('time', 'y', 'x'), stacked)
+
+    ds = xr.Dataset(arrays, coords=coords)
+    ds.to_zarr(zarr_path, mode='w', consolidated=True, zarr_format=2)
 
 
 def procesar_fuente(fuente, api, max_batches=None):
     nombre = fuente.replace('/', '_').lower()
     log.info(f"==== {fuente} ====")
-    escala_m, peso_img = info_fuente(fuente)
-    log.info(f"  Escala: {escala_m:.1f} m/px | peso/img: {peso_img/1024**2:.2f} MB")
+    escala_m, peso_img, bandas = info_fuente(fuente)
+    log.info(f"  Escala: {escala_m:.1f} m/px | bandas: {len(bandas)} {bandas} "
+             f"| peso/img: {peso_img/1024**2:.2f} MB")
 
     todos = listar_ids(fuente)
     hechos = cargar_cache(fuente)
@@ -185,18 +242,12 @@ def procesar_fuente(fuente, api, max_batches=None):
         log.info(f"  [{n_batch}/{len(batches)}] batch {batch_id} "
                  f"({len(ids)} imgs, est {len(ids)*peso_img/1024**2:.1f} MB)")
 
-        bandas_por_img = {}
-        for img_id in tqdm(ids, desc='    descargando', unit='img', leave=False):
-            try:
-                bandas_por_img[img_id] = descargar_imagen_por_bandas(
-                    fuente, img_id, escala_m, raw_dir
-                )
-            except Exception as e:
-                log.warning(f"    skip {img_id}: {e}")
+        ok_ids = descargar_lote(fuente, ids, bandas, escala_m, raw_dir)
+        log.info(f"    completas: {len(ok_ids)}/{len(ids)}")
 
         construir_zarr_batch(raw_dir, zarr_path)
 
-        for img_id, bandas in bandas_por_img.items():
+        for img_id in ok_ids:
             apilar_bandas(raw_dir, img_id, bandas,
                           os.path.join(raw_dir, f'{img_id}.tif'))
 
@@ -210,7 +261,7 @@ def procesar_fuente(fuente, api, max_batches=None):
         )
         log.info(f"    upload {time.time()-t0:.1f}s -> {nombre}/{batch_id}")
 
-        hechos.update(bandas_por_img.keys())
+        hechos.update(ok_ids)
         guardar_cache(fuente, hechos)
 
         shutil.rmtree(batch_dir, ignore_errors=True)
