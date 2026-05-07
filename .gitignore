@@ -1,2 +1,6 @@
 .venv
 .env
+logger/logs/
+hugging-face/descargas/
+hugging-face/cache/
+__pycache__/
