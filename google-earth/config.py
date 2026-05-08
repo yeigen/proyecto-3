@@ -1,4 +1,4 @@
-CALI = [-76.60, 3.30, -76.40, 3.55]
+CALI = [-76.65, 3.30, -76.30, 3.65]
 PROJECT_ID = 'proyecto-analitica-3-495618'
 
 FUENTES = [
