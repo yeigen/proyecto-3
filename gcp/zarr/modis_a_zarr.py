@@ -1,16 +1,28 @@
 import os
 import sys
 import io
+import gc
 import argparse
+import itertools
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-os.environ['CPL_LOG'] = '/dev/null'
+if os.name == 'nt':
+    os.environ['CPL_LOG'] = 'NUL'
+else:
+    os.environ['CPL_LOG'] = '/dev/null'
+
+os.environ['GDAL_CACHEMAX'] = '64'
+os.environ['GDAL_DISABLE_READDIR_ON_OPEN'] = 'TRUE'
 
 import numpy as np
 import xarray as xr
 import rioxarray
+import rasterio
+import zarr as zr
 from google.cloud import storage
 from tqdm import tqdm
+import gcsfs
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
@@ -25,73 +37,163 @@ PREFIJO = FUENTE.replace('/', '_').lower()
 BUCKET = 'fuentes-proyecto-3'
 RAW_PREFIX = f'{PREFIJO}/raw'
 ZARR_PREFIX = f'{PREFIJO}/panel.zarr'
-MAX_WORKERS = 16
+DOWNLOAD_WORKERS = 4
 bandas = BANDAS_UTILES[FUENTE]
 
 cliente = storage.Client(project=PROJECT_ID)
-bucket = cliente.bucket(BUCKET)
+bucket_gcs = cliente.bucket(BUCKET)
 
 
-def leer_tif(blob):
+def agrupar_por_fecha(blobs):
+    grupos = defaultdict(list)
+    for b in blobs:
+        fname = os.path.basename(b.name)
+        if not fname.endswith('.tif'):
+            continue
+        parts = fname.replace('.tif', '').split('_')
+        fecha = parts[1]
+        grupos[fecha].append(b.name)
+    return sorted(grupos.items(), key=lambda x: x[0])
+
+
+def batched(iterable, n):
+    it = iter(iterable)
+    while True:
+        chunk = list(itertools.islice(it, n))
+        if not chunk:
+            break
+        yield chunk
+
+
+def descargar_tif(blob_name):
+    blob = bucket_gcs.blob(blob_name)
     buf = io.BytesIO(blob.download_as_bytes())
     return rioxarray.open_rasterio(buf).values.astype('float32')
 
 
+def procesar_fecha(blob_names, H, W, n_bandas):
+    acumulador = np.zeros((n_bandas, H, W), dtype='float64')
+    contador = np.zeros((H, W), dtype='float32')
+
+    for blob_name in blob_names:
+        datos = descargar_tif(blob_name)
+        if datos.ndim == 3:
+            datos = datos[:n_bandas]
+        elif datos.ndim == 2:
+            datos = datos[np.newaxis, :n_bandas]
+
+        mask = ~np.isnan(datos[0])
+        contador += mask.astype('float32')
+        for b in range(min(datos.shape[0], n_bandas)):
+            acumulador[b][mask] += datos[b][mask]
+        del datos
+
+    valido = contador > 0
+    resultado = np.full((n_bandas, H, W), np.nan, dtype='float32')
+    for b in range(n_bandas):
+        resultado[b][valido] = (acumulador[b][valido] / contador[valido]).astype('float32')
+
+    return resultado
+
+
+def procesar_lote(fechas_lote, H, W, n_bandas, blob_names_por_fecha):
+    n = len(fechas_lote)
+    cubo = np.empty((n, n_bandas, H, W), dtype='float32')
+    img_ids = []
+
+    for i, fecha in enumerate(fechas_lote):
+        img_ids.append(fecha)
+        blob_names = blob_names_por_fecha[fecha]
+        cubo[i] = procesar_fecha(blob_names, H, W, n_bandas)
+
+    ds = xr.Dataset(
+        {'data': (('time', 'band', 'y', 'x'), cubo)},
+        coords={
+            'time': img_ids,
+            'band': bandas,
+            'y': y_vals_ref,
+            'x': x_vals_ref,
+        }
+    )
+
+    time_chunk = max(1, 256 * 1024**2 // (n_bandas * H * W * 4))
+    ds = ds.chunk({
+        'time': time_chunk,
+        'band': n_bandas,
+        'y': min(512, H),
+        'x': min(512, W),
+    })
+
+    return ds
+
+
+y_vals_ref = None
+x_vals_ref = None
+
+
 def main():
+    global y_vals_ref, x_vals_ref
+
     p = argparse.ArgumentParser()
-    p.add_argument('--max-imagenes', type=int, default=None)
+    p.add_argument('--max-fechas', type=int, default=None)
+    p.add_argument('--batch-size', type=int, default=100)
     args = p.parse_args()
 
-    blobs = sorted(bucket.list_blobs(prefix=f'{RAW_PREFIX}/'), key=lambda b: b.name)
+    blobs = sorted(bucket_gcs.list_blobs(prefix=f'{RAW_PREFIX}/'), key=lambda b: b.name)
     tifs = [b for b in blobs if b.name.endswith('.tif')]
-    if args.max_imagenes:
-        tifs = tifs[:args.max_imagenes]
 
-    log.info(f'MODIS Zarr | {len(tifs)} archivos | destino: gs://{BUCKET}/{ZARR_PREFIX}/')
+    fechas_dict = agrupar_por_fecha(tifs)
+    if args.max_fechas:
+        fechas_dict = fechas_dict[:args.max_fechas]
 
-    img_ids = [os.path.basename(b.name).replace('.tif', '') for b in tifs]
+    blob_names_por_fecha = {f: names for f, names in fechas_dict}
+    fechas = [f for f, _ in fechas_dict]
 
-    buf = io.BytesIO(tifs[0].download_as_bytes())
-    sample = rioxarray.open_rasterio(buf).isel(band=0)
-    H, W = sample.shape
+    log.info(f'MODIS Zarr | {len(fechas)} fechas | {len(tifs)} TIFFs | {len(bandas)} bandas')
+    log.info(f'destino: gs://{BUCKET}/{ZARR_PREFIX}/')
+    log.info(f'batch_size={args.batch_size} | workers={DOWNLOAD_WORKERS}')
 
-    cubo = np.zeros((len(tifs), len(bandas), H, W), dtype='float32')
-    futuro_a_idx = {}
+    primera_fecha = fechas[0]
+    primer_tif = blob_names_por_fecha[primera_fecha][0]
+    buf = io.BytesIO(bucket_gcs.blob(primer_tif).download_as_bytes())
+    with rasterio.open(buf) as src:
+        H, W = src.shape
+        dx, dy = src.transform.a, src.transform.e
+        xmin, ymax = src.transform.c, src.transform.f
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
-        for i, blob in enumerate(tifs):
-            futuro_a_idx[ex.submit(leer_tif, blob)] = i
+    y_vals_ref = np.arange(ymax, ymax + H * dy, dy)[:H]
+    x_vals_ref = np.arange(xmin, xmin + W * dx, dx)[:W]
 
-        with tqdm(total=len(tifs), desc='Leyendo', unit='img') as bar:
-            for f in as_completed(futuro_a_idx):
-                i = futuro_a_idx[f]
-                cubo[i] = f.result()
-                bar.update(1)
+    mem_por_fecha_mb = len(bandas) * H * W * 4 / 1024**2
+    mem_por_batch_mb = args.batch_size * mem_por_fecha_mb
+    log.info(f'Dimensiones: {H}x{W} | {mem_por_fecha_mb:.1f} MB/fecha | {mem_por_batch_mb:.0f} MB/batch')
 
-    coords = {
-        'time': img_ids,
-        'band': bandas,
-        'y': sample.y.values,
-        'x': sample.x.values,
-    }
+    fs = gcsfs.GCSFileSystem(token='google_default')
+    mapper = fs.get_mapper(f'{BUCKET}/{ZARR_PREFIX}')
 
-    ds = xr.Dataset({'data': (('time', 'band', 'y', 'x'), cubo)}, coords=coords)
+    lotes = list(batched(fechas, args.batch_size))
+    total_lotes = len(lotes)
 
-    tmp = f'/tmp/modis_{len(tifs)}.zarr'
-    ds.to_zarr(tmp, mode='w', consolidated=True, zarr_format=2)
+    for batch_idx, lote in enumerate(lotes):
+        log.info(f'Lote {batch_idx + 1}/{total_lotes}: {len(lote)} fechas')
 
-    items = []
-    for root, _, files in os.walk(tmp):
-        for fname in files:
-            local = os.path.join(root, fname)
-            remote = f'{ZARR_PREFIX}/{os.path.relpath(local, tmp)}'
-            items.append((local, remote))
+        ds = procesar_lote(lote, H, W, len(bandas), blob_names_por_fecha)
 
-    for local, remote in tqdm(items, desc='Subiendo', unit='file'):
-        bucket.blob(remote).upload_from_filename(local)
+        if batch_idx == 0:
+            ds.to_zarr(mapper, mode='w', consolidated=False, zarr_format=2, compute=True)
+        else:
+            ds.to_zarr(mapper, mode='a', append_dim='time', consolidated=False, zarr_format=2, compute=True)
 
-    peso = cubo.nbytes / 1024**2
-    log.info(f'Completado | {len(tifs)} timestamps | {len(bandas)} bandas | {peso:.1f} MB raw')
+        del ds
+        gc.collect()
+
+        log.info(f'Lote {batch_idx + 1} escrito')
+
+    log.info('Consolidando metadata...')
+    zr.consolidate_metadata(mapper)
+
+    peso_total = len(fechas) * len(bandas) * H * W * 4 / 1024**2
+    log.info(f'Completado | {len(fechas)} fechas | {len(bandas)} bandas | {H}x{W} | {peso_total:.1f} MB raw')
 
 
 if __name__ == '__main__':

@@ -47,7 +47,7 @@ Imágenes ópticas multiespectrales corregidas a reflectancia de superficie (Lev
 | Fechas en panel | 2021-01-01 → 2026-01-01 |
 | Imágenes en panel | **1,552** (intersección con BBox, sin filtro de nubosidad) |
 | Peso GeoTIFF | ~77 GB |
-| Peso Zarr (proyectado) | ~76 GB |
+| Peso Zarr (proyectado) | ~87 GB (zstd/c5/bitshuffle, chunks 5×13×974×974) |
 
 ### Bandas incluidas (13 / 26)
 
@@ -254,21 +254,27 @@ Profundidad óptica de aerosoles del algoritmo MAIAC (Multi-Angle Implementation
 
 ```python
 import xarray as xr
-import gcsfs
 
+# --- Desde HF Bucket (recomendado) ---
+# Instalar: pip install huggingface_hub[hf_xet]
+s2_url = "https://yeigen-fuentes-proyecto-3.hf.space/copernicus_s2_sr_harmonized/panel.zarr"
+ds_s2 = xr.open_zarr(s2_url, consolidated=True)
+print(ds_s2)
+# Dimensions: (time: 1552, band: 13, y: 3897, x: 3897)
+
+# Cálculo de NDVI al vuelo
+red = ds_s2["data"].sel(band="B4")
+nir = ds_s2["data"].sel(band="B8")
+ndvi = (nir.astype("float32") - red) / (nir + red)
+
+# --- Desde GCS (alternativa) ---
+import gcsfs
 fs = gcsfs.GCSFileSystem()
 
 # Sentinel-2: panel consolidado 4D
 ds_s2 = xr.open_zarr(fs.get_mapper(
     "fuentes-proyecto-3/copernicus_s2_sr_harmonized/panel.zarr"
 ), consolidated=True)
-print(ds_s2)
-# Dimensions: (time: 1552, band: 13, y: 3897, x: 3897)
-
-# Cálculo de NDVI al vuelo
-red = ds_s2["reflectance"].sel(band="B4")
-nir = ds_s2["reflectance"].sel(band="B8")
-ndvi = (nir.astype("float32") - red) / (nir + red)
 
 # S5P NO2 por batch
 ds_no2 = xr.open_zarr(fs.get_mapper(

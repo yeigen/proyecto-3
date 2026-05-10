@@ -8,11 +8,11 @@ Análisis del peso de los datos en cada etapa del pipeline: **fuente original �
 |---|---|---|---|---|---|
 | **Crudo teórico** (sin compresión, BBox Cali+Yumbo+Acopi) | ~612 GB | ~2.5 GB | ~5 MB | ~2.4 GB | **~617 GB** |
 | **GeoTIFF + LZW** (medido) | 76.99 GB | 0.14 GB | 0.085 GB | 0.022 GB | **77.23 GB** |
-| **Zarr + LZ4/Zstd** (proyectado) | ~77 GB | 0.07 GB | 0.008 GB | 0.009 GB | **~77 GB** |
+| **Zarr + Zstd/bitshuffle** (proyectado) | ~87 GB | 0.07 GB | 0.008 GB | 0.009 GB | **~87 GB** |
 
 **Compresión efectiva**:
 - GeoTIFF LZW: **8x** sobre crudo (de 617 → 77 GB)
-- Zarr LZ4: **0.97x** sobre LZW (peso similar; cambia la estructura, no el ratio)
+- Zarr Zstd: **0.97x** sobre LZW proyectado (ratio similar; cambia la estructura, no el ratio)
 
 **Umbral del proyecto: ≥ 50 GB** ✅ Cumplido con margen del **54%** sobre solo el panel GeoTIFF.
 
@@ -111,7 +111,7 @@ Cada fuente tiene un peso crudo determinado por **4 variables físicas**: resolu
 
 ---
 
-## Por qué Zarr LZ4 NO comprime más
+## Por qué Zarr Zstd/bitshuffle comprime diferente
 
 Test directo medido sobre archivo `20210106T..._T18NUJ__spectral.tif` (12 bandas densas):
 
@@ -119,8 +119,8 @@ Test directo medido sobre archivo `20210106T..._T18NUJ__spectral.tif` (12 bandas
 |---|---|---|---|
 | Sin compresión | 347.6 MB | 1.0x | — |
 | GeoTIFF + LZW | 408.6 MB | **0.85x** (¡peor!) | rápido |
-| Zarr + LZ4 (Blosc lvl 5) | 196.8 MB | 1.77x | muy rápido |
-| Zarr + Zstd (Blosc lvl 3) | 131.4 MB | 2.65x | medio |
+| Zarr + Zstd (Blosc lvl 5, bitshuffle) | 131 MB | 2.65x | medio |
+| Zarr + LZ4 (Blosc lvl 5) | 197 MB | 1.77x | muy rápido |
 
 Y para `__B4.tif` individual (datos sparse de borde swath):
 
@@ -128,12 +128,12 @@ Y para `__B4.tif` individual (datos sparse de borde swath):
 |---|---|---|
 | Sin compresión | 28.97 MB | 1.0x |
 | GeoTIFF + LZW | 1.99 MB | **14.6x** |
+| Zarr + Zstd (bitshuffle) | 2.31 MB | 12.6x |
 | Zarr + LZ4 | 3.97 MB | 7.3x |
-| Zarr + Zstd | 2.31 MB | 12.6x |
 
 **Conclusiones**:
 1. LZW de GEE es **excepcionalmente bueno** sobre datos satelitales sparse — supera a LZ4 e iguala casi a Zstd
-2. Zarr usa LZ4 default por velocidad de lectura/escritura, no por ratio
+2. Zstd+bitshuffle es el compresor óptimo para S2 (float32 con NaN): ~1.5x mejor ratio que LZ4, aceptable velocidad escritura
 3. **No estamos "recomprimiendo" en Zarr** (ver [JUSTIFICACION_FORMATO.md](JUSTIFICACION_FORMATO.md)) — estamos cambiando la **estructura de chunking**
 
 **Referencias**:
@@ -150,7 +150,7 @@ Inventario verificable con `gcloud storage du -s gs://fuentes-proyecto-3/`:
 
 ```
 copernicus_s2_sr_harmonized:        19,400 archivos × ~4 MB    = 76.99 GB
-  └ panel.zarr/ (en construcción):   1,050 archivos × ~14 MB   = 14.05 GB → proyección final ~77 GB
+  └ panel.zarr/ (en construcción):   ~302 archivos × ~11 MB   = 3.34 GB escritos (batch 12/311) → proyección final ~87 GB
 
 copernicus_s5p_offl_l3_no2:         14,799 archivos × 2.7 KB   = 0.040 GB
   └ batch_NNNN.zarr/ ×512:           5,900 archivos × 4 KB     = 0.022 GB
@@ -181,7 +181,7 @@ Todos los pasos del pipeline tienen log estructurado en `logger/logs/` (modulo `
 | S2 download (2ª iter, exitosa) | `exportar_s2_20260508_*.log` | varios | 1552 imágenes en 8h05min |
 | S5P + ERA5 download | `exportar_zarr_gcs_*.log` | 0.27 MB c/u | 5 logs (1 por intento/sesión) |
 | MODIS download (resume) | `modis_resume.log` (en `/root/`) | actualizando | desde batch 1, salta cached |
-| S2 → Zarr consolidación | `consolidar_s2_zarr_*.log` | en curso | 311 bloques de 5 imágenes |
+| S2 → Zarr consolidación | `zarr_s2_20260510_153531.log` | en curso | 311 bloques de 5 imágenes, chunks (5,13,974,974), zstd/c5/bitshuffle |
 
 **Estructura de cada log** (formato del `logger` del proyecto):
 ```

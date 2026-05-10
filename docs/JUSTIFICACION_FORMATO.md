@@ -4,7 +4,7 @@
 
 El panel de datos satelitales se persiste en **dos formatos complementarios**:
 1. **GeoTIFF** (Cloud Optimized) en `gs://fuentes-proyecto-3/{fuente}/raw/`
-2. **Zarr v3** en `gs://fuentes-proyecto-3/{fuente}/{batch}.zarr/` y `panel.zarr/` (S2)
+2. **Zarr v3** en `gs://fuentes-proyecto-3/{fuente}/{batch}.zarr/` y `panel.zarr/` (S2), compresión blosc/zstd/c5/bitshuffle
 
 No es duplicación. Cada uno tiene un rol específico:
 
@@ -24,9 +24,10 @@ GeoTIFF: 1 archivo monolítico por (imagen, banda)
   → para leer pixel[200,200] de los 1552 timestamps,
     hay que abrir 1552 archivos secuencialmente
 
-Zarr: chunks (time=5, band=13, y=1024, x=1024)
+Zarr: chunks (time=5, band=13, y=974, x=974)
   → para leer pixel[200,200] de los 1552 timestamps,
     se leen ~310 chunks (uno por cada slice de 5 imágenes)
+  → compresión blosc/zstd/c5/bitshuffle (mejor ratio que LZ4 sobre datos con NaN)
 ```
 
 **El Zarr no comprime mejor que el GeoTIFF** — al contrario, los GeoTIFFs LZW de GEE comprimen excepcionalmente bien sobre datos sparse. El Zarr existe por la **estructura**, no por el peso.
@@ -41,8 +42,8 @@ Sentinel-2 es naturalmente un array 4D `(time, band, y, x)` → Zarr es el forma
 
 ## Costo del formato dual
 
-- **Almacenamiento extra**: ~80 GB Zarr S2 sumados a los 77 GB GeoTIFF = ~157 GB total
-- **Costo monetario**: $0.020/GB/mes en GCS Standard = $3.14/mes
+- **Almacenamiento extra**: ~87 GB Zarr S2 (zstd/bitshuffle) sumados a los 77 GB GeoTIFF = ~164 GB total
+- **Costo monetario**: $0.020/GB/mes en GCS Standard = $3.28/mes
 - **Tiempo de cómputo de la conversión**: ~2.8 horas en una VM 4 vCPU/8 GB
 - **Beneficio**: pipeline de Situaciones 2 y 3 viable (sin Zarr, abrir 1552 GeoTIFFs por consulta hace prohibitivos los modelos)
 
@@ -50,7 +51,7 @@ Sentinel-2 es naturalmente un array 4D `(time, band, y, x)` → Zarr es el forma
 
 - [Zarr specification v3](https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html)
 - [Cloud Optimized GeoTIFF spec](https://www.cogeo.org/)
-- [xarray + Zarr para teledetección](https://xarray.dev/blog/zarr-everywhere)
-- [STAC + COG vs Zarr (Pangeo)](https://discourse.pangeo.io/t/stac-vs-zarr-when-to-use-which/3196)
+- [xarray + Zarr para teledetección](https://docs.xarray.dev/en/stable/user-guide/io.html#zarr)
+- [STAC + COG vs Zarr (Pangeo)](https://discourse.pangeo.io/)
 - [Tutorial: GeoTIFF a Zarr con compresión](https://corteva.github.io/rioxarray/stable/examples/convert_to_raster.html)
 - [PDF asignatura](../proyecto/ProyectoFinal_GeoVisionCLIP_Cali.pdf), Situación 1, p. 4

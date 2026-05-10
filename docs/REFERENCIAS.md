@@ -142,6 +142,68 @@ El PDF de la asignatura pide ERA5-Land, pero ese dataset **no contiene `boundary
 
 ---
 
+## HuggingFace Hub — Almacenamiento del panel
+
+### Bucket vs Dataset Repo
+
+HuggingFace ofrece dos formas de almacenar datos:
+
+| | **Bucket** | **Dataset Repo** |
+|---|---|---|
+| Almacenamiento | Objeto puro (S3-like), Xet backend | Git + LFS |
+| Versionado | No ( mutable, sin historial) | Si (commits, branches, tags) |
+| Limite archivos | Sin limite practico | ~10,000 por carpeta |
+| Dataset Viewer | No | Si |
+| URL de acceso | `hf://buckets/namespace/name` | `hf://datasets/namespace/name` |
+| Comando upload | `hf buckets sync` | `hf upload` / `upload_large_folder` |
+| Ideal para | Zarr grandes, artefactos, checkpoints | Datasets con tarjeta, versionado |
+
+Usamos **Bucket** para los zarr del panel porque:
+1. Sin limite de 10K archivos/carpeta (S2 tendra ~5,000 chunks)
+2. Upload resumible y mas rapido con `hf buckets sync`
+3. Sin overhead de git LFS (no necesita squash_history)
+4. Acceso directo via URL publica
+
+### Bucket del proyecto
+
+- **Bucket**: [`yeigen/fuentes-proyecto-3`](https://huggingface.co/buckets/yeigen/fuentes-proyecto-3)
+- **URL base**: `https://huggingface.co/buckets/yeigen/fuentes-proyecto-3`
+
+### Documentacion
+
+- [HuggingFace Buckets Guide](https://huggingface.co/docs/huggingface_hub/en/guides/buckets) — almacenamiento tipo S3 en HF con Xet backend
+- [hf CLI Reference](https://huggingface.co/docs/huggingface_hub/en/guides/cli) — comando `hf buckets sync`, `hf buckets cp`, `hf buckets list`
+- [XBDrive/Xet Storage](https://huggingface.co/docs/huggingface_hub/en/guides/buckets#xet-storage) — backend de deduplicacion por contenido
+- [HuggingFace Hub Python Library](https://huggingface.co/docs/huggingface_hub) — SDK para interaccion programatica
+
+### Comandos utiles
+
+```bash
+# Listar contenido del bucket
+hf buckets list yeigen/fuentes-proyecto-3 -R -h
+
+# Sincronizar staging local al bucket
+hf buckets sync hugging-face/staging/ hf://buckets/yeigen/fuentes-proyecto-3
+
+# Copiar un archivo al bucket
+hf buckets cp ./archivo.zarr hf://buckets/yeigen/fuentes-proyecto-3/dataset/panel.zarr/
+
+# Descargar del bucket al local
+hf buckets sync hf://buckets/yeigen/fuentes-proyecto-3 ./data/
+```
+
+### Acceso a los datos
+
+Los zarr se leen directamente desde el bucket HF con xarray/zarr:
+
+```python
+import xarray as xr
+base = "https://huggingface.co/buckets/yeigen/fuentes-proyecto-3"
+ds = xr.open_dataset(f"{base}/ecmwf_era5_hourly/panel.zarr", engine='zarr', consolidated=False)
+```
+
+---
+
 ## Formatos y herramientas
 
 ### GeoTIFF
@@ -169,8 +231,6 @@ El PDF de la asignatura pide ERA5-Land, pero ese dataset **no contiene `boundary
 - [xarray Documentation](https://docs.xarray.dev/)
 - [Pangeo — Cloud Native Geospatial](https://pangeo.io/)
 - [Blosc Compression Library](https://www.blosc.org/)
-- [HuggingFace Hub Python Library](https://huggingface.co/docs/huggingface_hub)
-
 ---
 
 ## Context7 (Consultas rapidas con snippets)

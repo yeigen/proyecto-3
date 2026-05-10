@@ -45,7 +45,7 @@ def exportar_banda(fuente_id, img_id, banda):
         'crs': 'EPSG:4326',
         'format': 'GEO_TIFF',
     })
-    r = requests.get(url, timeout=600, stream=True)
+    r = requests.get(url, timeout=300, stream=True)
     r.raise_for_status()
     blob.upload_from_file(io.BytesIO(r.content), content_type='image/tiff')
     return img_id, banda, True, f'{blob.size / 1024**2:.1f}MB'
