@@ -267,3 +267,118 @@ He buscado riesgos no documentados. Lo que encontré:
 > pequeños ya están en HuggingFace. Solo falta subir S2 a HF con el script
 > nuevo `subir_s2_hf.py` cuando el droplet termine, y armar el manifest MD5 +
 > notebook EDA como entregables formales del PDF.
+
+---
+
+## 10. Por qué S2 se procesa por batches y los demás no (defensa técnica)
+
+Los 5 datasets pequeños cargan **todo el cubo en RAM** antes de escribir el Zarr:
+
+| Fuente | Cubo en RAM | Tamaño |
+|---|---|---:|
+| S5P NO₂ | 25,592 × 3 × 36 × 35 × 4 B | ~390 MB |
+| S5P SO₂ / O₃ | similar | ~260 MB |
+| ERA5 | 43,824 × 8 × 2 × 2 × 4 B | ~11 MB |
+| MODIS (con batches de 100 fechas) | 100 × 4 × 43 × 43 × 4 B | ~2.8 MB/batch |
+| **Sentinel-2** | **1,552 × 13 × 3,897 × 3,897 × 4 B** | **~474 GB** |
+
+S2 es ~474 GB sin comprimir — imposible cargar en los 8 GB RAM del droplet (o
+en cualquier máquina razonable). La única vía es procesar por batches y usar
+`append_dim='time'`, que es la API canónica de `xarray.to_zarr` en modo `'a'`
+para escritura incremental.
+
+### Por qué esto no rompe nada
+
+1. **`append_dim='time'` no es concatenación manual** — es el mecanismo nativo
+   de xarray/zarr para escribir un array N-dimensional en pasos. Garantiza que
+   cada chunk se materializa en su posición correcta dentro del store.
+2. **El chunk size `(5, 13, 974, 974)` está alineado con el batch de 5 imágenes**
+   → cada batch escribe exactamente un slice temporal de chunks. **Ningún chunk
+   se reescribe ni se fragmenta**.
+3. **Encoding solo en el primer batch** (modo `'w'`) → los demás batches heredan
+   el compresor `blosc/zstd/c5/bitshuffle`. Sin riesgo de codecs mixtos.
+4. **`zr.consolidate_metadata` al final** → produce un único `.zmetadata`
+   idéntico al de una escritura monolítica.
+5. **Coherencia ya verificada**: `diff_max=0.000000` en B1/B4/B8/SCL contra
+   GeoTIFF raw.
+
+**Conclusión**: la diferencia con los scripts pequeños es *cuándo* se materializa
+cada chunk, no *qué* se materializa. Para un cliente que lee el panel
+(`xr.open_zarr(...)`), los 6 paneles son indistinguibles en estructura.
+
+---
+
+## 11. Por qué Zarr es mejor que GeoTIFF para este proyecto
+
+GeoTIFF y Zarr no compiten en compresión — compiten en **patrón de acceso**.
+Para este proyecto el cuello de botella no es el peso, es **cómo se leen los
+datos en las Situaciones 2 y 3**.
+
+### Diferencia estructural
+
+```
+GeoTIFF: 1 archivo = (banda × y × x). La dimensión "time" son N archivos sueltos.
+Zarr:    1 store   = (time × band × y × x). Una sola estructura indexable.
+```
+
+Para responder *"valor del pixel (200, 300) en las 1,552 fechas"*:
+
+- **GeoTIFF**: abrir 1,552 archivos → 1,552 seeks HTTP → 1,552 decompresiones
+  de tile → extraer 1 píxel de cada uno. ~6 GB de I/O para obtener 6.2 KB de
+  señal.
+- **Zarr** (chunks `(5, 13, 974, 974)`): 312 chunks tocados → cada chunk trae
+  5 timestamps contiguos en una sola decompresión. I/O efectivo: ~5-10 MB.
+
+### Patrones de acceso del proyecto
+
+| Operación | GeoTIFF | Zarr |
+|---|---|---|
+| Situación 2 — ViT-CLIP lee tiles `64×64×13` | 1 archivo + GDAL crop | 1 chunk completo |
+| Situación 2 — minibatch de 16 tiles × 8 timestamps | 128 file opens | ~16 chunks (1 read paralelo) |
+| Situación 3 — Kriging ST lee `pixel[:, :, j, i]` | 1,552 file opens | 312 chunks |
+| EDA — "media por banda en toda la ventana" | iterar 19,400 .tif | `ds.mean(['time','y','x'])` lazy |
+| Predicción ConvLSTM — secuencia de 8 frames | 8 file opens + alinear | 2 chunks |
+
+GeoTIFF gana solo en *"dame una imagen completa"*. Para todo lo demás, Zarr es
+órdenes de magnitud más eficiente. El proyecto no hace consultas de "una imagen
+completa" en producción — hace **inferencia distribuida sobre tiles** e
+**interpolación geoestadística sobre series temporales**.
+
+### Compresión adaptada al dato
+
+`blosc/zstd/c5/bitshuffle` es ~2.65× sobre datos densos S2 (LZW de GEE es solo
+0.85× ahí, ver `PESOS_PIPELINE.md`). El truco es bitshuffle: reordena los bytes
+float32 para que todos los exponentes IEEE 754 queden contiguos, y zstd los
+comprime brutalmente. Sobre cuerpos de agua, vegetación homogénea o cielo
+nublado, un chunk de 247 MB sin comprimir cae a 10-15 MB.
+
+### Compatibilidad con el stack del proyecto
+
+- **xarray** abre Zarr en una línea (`xr.open_zarr`) con slicing perezoso.
+- **Dask** distribuye la lectura de chunks Zarr en workers paralelos —
+  fundamental para entrenar ConvLSTM en GPU sin cuello de botella en I/O.
+- **HTTP Range requests** sobre Zarr en GCS o HF: un cliente lee
+  `pixel[200:300, :, 1000:2000, 1500:2500]` sin descargar el panel entero.
+- **`consolidate_metadata`** = 1 sola request HTTP describe shape, chunks,
+  dtype, compresor y coordenadas. Con 1,552 GeoTIFFs habría que abrir y parsear
+  cada IFD.
+
+### Es el formato que pide el PDF
+
+> *Situación 1, tarea 4 (p.4)*: "Convertir las series temporales a formato Zarr
+> (recomendado para arrays N-dimensionales con chunking espacio-temporal) o
+> Parquet particionado..."
+
+Sentinel-2 es naturalmente `(time, band, y, x)` — un array 4D. Parquet sería
+forzar un esquema tabular sobre algo que no lo es; Zarr es la opción
+técnicamente correcta.
+
+### Síntesis de la decisión dual GeoTIFF + Zarr
+
+- **GeoTIFF** queda como *source-of-truth auditable* — es el formato que entrega
+  GEE; podemos verificar pixel-a-pixel contra la API original.
+- **Zarr** es la *vista analítica* que hace viables las Situaciones 2 y 3.
+  Sin él, abrir 1,552 archivos por consulta de serie temporal hace el Kriging y
+  la ConvLSTM inviables en tiempo de entrenamiento.
+
+Más detalle técnico en [`conceptos/geotiff-vs-zarr.md`](conceptos/geotiff-vs-zarr.md).
