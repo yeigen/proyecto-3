@@ -1,7 +1,7 @@
 {
   "dataset_id": "geovision_cali_v1",
   "version": "1.0",
-  "created_at": "2026-05-13T00:59:32.448292+00:00",
+  "created_at": "2026-05-13T03:26:16.581952+00:00",
   "creators": "Equipo GeoVision-CLIP Cali — UAO",
   "project": "GeoVision-CLIP Cali: Estimación de contaminación atmosférica",
   "repository": {
@@ -20,7 +20,7 @@
     "region": "Área metropolitana de Santiago de Cali, Valle del Cauca, Colombia"
   },
   "temporal_extent": {
-    "start": "2020-01-01",
+    "start": "2021-01-01",
     "end": "2025-12-31"
   },
   "summary": {
@@ -496,5 +496,5 @@
       }
     }
   },
-  "manifest_hash_md5": "9f4482d377b5d939fbfe893366c72a35"
+  "manifest_hash_md5": "95fd112867f0d070a3294919f6907525"
 }
