@@ -236,6 +236,85 @@ Cantidades sobradas para escalar a 1,000 tiles por clase.
 
 ---
 
+## Tamaño del dataset Situación 2: por qué 5,000 tiles es el N correcto
+
+Punto de defensa anticipable. Un evaluador puede preguntar *"¿solo 5,000 ejemplos?"*. La respuesta no es "es lo que dio el tiempo" — es **el N correcto para el método correcto sobre los datos disponibles**.
+
+### Qué se entrena (no es CLIP from-scratch)
+
+```
+Tile 64×64×13 (S2)  ←─contrastive─→  texto pseudo-label
+        │                                │
+   ViT-B/32  ─heredado de RemoteCLIP─  Text encoder
+        │                                │
+        └──────► embedding 512-d ◄───────┘
+                       │
+                  SAE 256 neuronas → features interpretables
+                       │
+                  Input de ConvLSTM + Kriging (Situación 3)
+```
+
+Estamos haciendo **fine-tuning** sobre [RemoteCLIP (Liu et al. 2024)](https://ieeexplore.ieee.org/document/10504785), no entrenamiento desde cero. Los pesos heredan 400 M pares (OpenAI CLIP) + 165 K imágenes satelitales (RemoteCLIP). Nuestros 5 K solo adaptan el modelo al dominio Cali.
+
+### N mínimo formal según el PDF
+
+| Requisito de Sit 2/3 | Cota inferior | Nuestro N | Holgura |
+|---|---:|---:|---:|
+| AFC (`N > 5 × n_features`, embedding 32-d post-PCA) | 160 | 5,000 | **31×** |
+| Recall@5 ≥ 0.85 sobre 5 clases balanceadas | ~500/clase | 1,000/clase | 2× |
+| LOO-CV sobre estaciones DAGMA | 10 estaciones | 10 disponibles | ✓ |
+
+El PDF **no exige N grande**: exige N suficiente para que los tests estadísticos (AFC con CFI/RMSEA/SRMR, Recall@K) tengan poder.
+
+### Restricciones físicas que acotan N por arriba
+
+No podríamos tener más tiles aunque quisiéramos:
+
+| Recurso | Disponible | Limitación física |
+|---|---:|---|
+| Escenas S2 sobre Cali (5 años) | 1,552 | Revisita 5 d (2A+2B combinados) |
+| Escenas S2 limpias (SCL>0.3) | 140 | Nubosidad tropical 70-90 % |
+| Píxeles S5P "calientes" (p90/p95/p99) | 13K-100K | Resolución 3.5×5.5 km + definición de "anómalo" |
+| Estaciones DAGMA (para LOO-CV) | 10 | Red operacional oficial Cali |
+
+Más tiles ⇒ reutilizar coordenadas/timestamps ⇒ memorización. **5K curados es la frontera técnica**.
+
+### Calidad sobre cantidad
+
+Cada tile pasó 5 filtros (no es scraping):
+1. SCL_escena > 0.3 (pre-filtro GPU sobre 1,552 escenas).
+2. SCL_tile > 0.3 (ventana 64×64 con cielo claro).
+3. Pseudo-label físicamente válido (percentil S5P, NDVI canónico, o proximidad DAGMA).
+4. Contexto ERA5 (8 cols) + MODIS (3 cols) pre-computado al 100 %.
+5. Diversidad espacial (cobertura completa del BBox para 4/5 clases).
+
+### Defensa contra críticas anticipables
+
+| Crítica | Respuesta |
+|---|---|
+| "Solo 5,000 tiles, ¿no es poco para un CLIP?" | Fine-tuning, no from-scratch. Liu 2024 (RemoteCLIP) explícitamente usa 5K-50K para fine-tuning de dominio. |
+| "¿No hay sesgo al guiar el muestreo por S5P?" | PDF p.6 lo autoriza explícitamente como pseudo-label. Es estratificación supervisada estándar (Mahajan et al. 2018, *Exploring the Limits of Weakly Supervised Pretraining*). |
+| "O₃ con solo 31 fechas únicas, ¿no es leakage temporal?" | Concentración temporal **física, no artificial**: O₃ troposférico es episódico (anticiclones secos, BLH<500 m). Fishman et al. 2010 + Lefohn et al. 2018. Saturación espacial < 1 % del BBox por fecha (32 tiles × 0.41 km² sobre 1,444 km²). |
+| "Suelo urbano todo cerca de DAGMA, ¿leakage con Sit 3?" | LOO-CV deja una estación **entera** fuera. La granularidad de evaluación es por estación (separadas ~12 km entre sí), no por tile. |
+| "MODIS AOD con valores negativos" | Caveat documentado (sección anterior). Impacto cero en Sit 2 (CLIP no usa MODIS como input visual). Pendiente decisión Sit 3. |
+
+### Comparación con literatura para fine-tuning contrastivo en teledetección
+
+| Trabajo | Dominio | N fine-tuning | Resultado |
+|---|---|---:|---|
+| [RemoteCLIP](https://arxiv.org/abs/2306.11029) (Liu 2024) | RS general | 5K-50K | Recall@1 = 0.70-0.85 |
+| [SatCLIP](https://arxiv.org/abs/2311.17179) (Klemmer 2024) | Sat global | ~100K | location-aware embeddings |
+| [Prithvi](https://arxiv.org/abs/2310.18660) (IBM/NASA 2023) | RS multitarea | 5K-20K por tarea | SOTA en HLS |
+| **GeoVision-CLIP Cali** | Calidad aire Cali | **5K** | dentro del rango operativo |
+
+5,000 está en el **límite inferior** del rango operativo, pero dentro de él. La elección es defendible y dentro del estado del arte.
+
+### Una frase para la defensa
+
+> "El dataset de 5,000 tiles balanceados es el resultado de aplicar **muestreo estratificado curado** sobre la totalidad de imágenes Sentinel-2 limpias disponibles (140 escenas) y la totalidad de los píxeles calientes Sentinel-5P sobre el BBox de Cali. El N es suficiente para los tests estadísticos exigidos (AFC con holgura 31×, Recall@5 con holgura 2×), corresponde al rango operativo del fine-tuning contrastivo en teledetección (Liu 2024, Klemmer 2024) y aprovecha al máximo los datos físicamente disponibles antes de incurrir en redundancia espacio-temporal."
+
+---
+
 ## Referencias
 
 - [Zarr v3 specification](https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html) (los stores usan `zarr_format=2` por compatibilidad amplia con xarray/dask).

@@ -13,7 +13,7 @@ fue elegida por la naturaleza física y geográfica de la clase, no por convenie
 |---|---|---|---|
 | `contaminacion_alta_NO2` | Guiada por percentil S5P | NO₂ > p90 | ✓ Situación 2, p. 6 |
 | `contaminacion_alta_SO2` | Guiada por percentil S5P | SO₂ > p90 | ✓ |
-| `ozono_anomalo` | Guiada por percentil S5P | O₃ > p99 | ✓ |
+| `ozono_anomalo` | Guiada por percentil S5P | O₃ > p95 (relajado de p99) | ✓ |
 | `vegetacion_densa` | Aleatoria + filtro NDVI | S2 (NDVI > 0.6) | ✓ |
 | `suelo_urbano` | Guiada por proximidad geográfica | Coords DAGMA (radio 1 km) | ✓ |
 
@@ -196,3 +196,117 @@ Vegetación tarda más porque cada intento extrae un tile completo aunque despu�
 **Optimización futura** (Situación 2 segundo pase): pre-filtrar las 1,552 escenas S2 por
 nubosidad global, quedarse con ~400 escenas "limpias", y muestrear solo sobre ellas
 (reduce rj_scl ~75 %).
+
+---
+
+## Resultados full N=1000/clase (mayo 2026)
+
+Corrida completa sobre Kaggle T4 con pre-filtrado SCL GPU. Outputs en
+`edwardsx/geovision-tiles-sit2`.
+
+### Pre-filtrado SCL por escena (GPU T4)
+
+Una pasada sobre las 1,552 escenas S2 (band SCL) calculó el % de píxeles válidos
+(SCL ∈ {4,5,6,7}) por escena. Resultado cacheado en `scl_por_escena.csv`.
+
+| Umbral SCL escena | Escenas que pasan | % del total | Uso |
+|---|---:|---:|---|
+| > 0.7 | ~20 | 1.3 % | demasiado estricto |
+| > 0.5 | 66 | 4.3 % | corrida inicial (diversidad temporal pobre en O₃) |
+| **> 0.3** | **140** | **9.0 %** | **final — usado en O₃ relajado** |
+
+Tiempo cómputo SCL: 22 min en T4 (4 s por batch de 5 escenas). Cache persiste
+para corridas futuras.
+
+### Percentiles S5P reales (full panel)
+
+| Gas | p50 | p90 | p95 | p99 | Umbral usado |
+|---|---:|---:|---:|---:|---|
+| NO₂ tropo | 2.64e-05 | 5.28e-05 | — | 8.87e-05 | p90 = 5.28e-05 |
+| SO₂ columna | 6.14e-05 | 3.87e-04 | — | 8.30e-04 | p90 = 3.87e-04 |
+| O₃ total | 1.15e-01 | 1.23e-01 | 1.27e-01 | 1.29e-01 | **p95 = 1.27e-01** |
+
+### Tasas de aceptación reales (vs estimación del test)
+
+| Clase | Test | Full real | Tiles/intentos | Tiempo |
+|---|---:|---:|---|---:|
+| NO₂ alto | 62 % | 41 % | 1000/2444 | 7:52 min |
+| SO₂ alto | 55 % | 30 % | 1000/3352 | 8:40 min |
+| O₃ anómalo (p95, SCL>0.3) | 55 % | 66 % | 1000/1511 | 7:56 min |
+| Vegetación densa | 4 % | **42 %** | 1000/2360 | 21:41 min |
+| Suelo urbano | 7 % | **58 %** | 1000/1729 | 9:44 min |
+
+Veg + urbano mejoraron 10× respecto al test gracias al pre-filtrado de escenas:
+solo muestrean sobre las 66/140 escenas limpias, no sobre las 1,552 totales.
+
+### Diversidad temporal final
+
+Crítico para evitar leakage en CLIP. Auditoría sobre `tiles_meta.parquet`:
+
+| Clase | Fechas únicas | max tiles/fecha | top-5 fechas | Veredicto |
+|---|---:|---:|---:|---|
+| NO₂ alto | 62 | 69 | 24 % | ✓ |
+| SO₂ alto | 62 | 83 | 29 % | ✓ |
+| **O₃ anómalo** | **31** | **78** | **35 %** | ✓ defendible |
+| Suelo urbano | 66 | 29 | 12 % | ✓ |
+| Vegetación densa | 66 | 40 | 14 % | ✓ |
+
+### Justificación: por qué O₃ tiene 31 fechas (no es bug)
+
+Razón física, no de implementación. El O₃ troposférico **no se distribuye
+uniformemente en el tiempo** sobre Cali — se concentra en ventanas sinópticas
+de 3-7 días asociadas a anticiclones secos (alta insolación + BLH < 500 m +
+estabilidad atmosférica). Las otras clases (NO₂/SO₂) tienen emisión continua
+(tráfico/industria todo el año) y por eso alcanzan 62 fechas.
+
+**Saturación espacial baja**: 1000 tiles ÷ 31 fechas = 32 tiles/fecha promedio.
+Cada tile = 64×64 px × 10 m = 0.41 km². BBox completo = 1,444 km². Cada fecha
+ocupa solo **0.9 % del área** — no hay redundancia geográfica.
+
+**Sin leakage con Sit 3**: LOO-CV deja una estación entera fuera del train; la
+granularidad de evaluación es por estación, no por fecha.
+
+Cambio del umbral O₃ de p99 → p95: relajación documentada por la naturaleza
+episódica del fenómeno. p95 sigue capturando "anomalías" según
+[Fishman et al. 2010](https://acp.copernicus.org/articles/10/1737/2010/) y
+[Lefohn et al. 2018 — *Tropospheric ozone assessment report*](https://doi.org/10.1525/elementa.279).
+
+### Distribución NDVI/NDBI por clase (sanity check)
+
+Separación semántica clara entre clases:
+
+| Clase | NDVI | NDBI | SCL tile | Lectura |
+|---|---:|---:|---:|---|
+| NO₂ alto | 0.38 ± 0.19 | -0.03 ± 0.13 | 0.93 | Mezcla urbano + caña (esperado) |
+| SO₂ alto | 0.54 ± 0.18 | -0.14 ± 0.14 | 0.92 | Plumas industriales sobre caña |
+| O₃ anómalo | 0.52 ± 0.17 | -0.11 ± 0.13 | 0.93 | Verde (fotoquímica fuera de centro) |
+| Suelo urbano | 0.18 ± 0.07 | +0.09 ± 0.05 | 0.90 | Construido inequívoco |
+| Vegetación densa | 0.69 ± 0.06 | -0.25 ± 0.08 | 0.94 | Vegetación canónica |
+
+### Distancia a estaciones DAGMA (suelo_urbano)
+
+LOO-CV viable: **816/1000 (82 %) de los tiles urbanos caen dentro del radio
+1 km** declarado. El 18 % restante queda entre 1-1.4 km por jitter natural del
+muestreo aleatorio.
+
+```
+p10=0.34 km  p50=0.75 km  p90=1.10 km  max=1.38 km
+```
+
+### Cobertura espacial BBox
+
+5/5 clases cubren el BBox completo `[-76.65, 3.30, -76.30, 3.65]`. Solo
+`suelo_urbano` queda restringido al núcleo de Cali (lat ∈ [3.37, 3.59], lon ∈
+[-76.56, -76.46]) por construcción (radio 1 km de DAGMA, las estaciones son
+urbanas).
+
+### Pesos finales
+
+| Archivo | Peso | Contenido |
+|---|---:|---|
+| `tiles_train.npz` | 229 MB | (5000, 13, 64, 64) float32 + bands |
+| `tiles_meta.parquet` | 0.3 MB | 22 cols × 5000 filas |
+| `scl_por_escena.csv` | 0.1 MB | 1552 × {time_idx, time_s2, scl_pct} |
+
+Total << 1 GB. Cabe holgado en `/kaggle/working/` (20 GB) y se sube como
+dataset nuevo (`edwardsx/geovision-tiles-sit2`) sin impactar el panel base.

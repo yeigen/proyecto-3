@@ -9,7 +9,7 @@ Cronología y estado del trabajo. Se actualiza con cada hito.
 ## Estado actual (fecha de corte: 2026-05-16)
 
 **Situación 1**: ✓ casi cerrada. Panel ≥ 50 GB con margen, 6 fuentes verificadas, conversión lossless bit-perfect.
-**Situación 2**: ⏳ en muestreo. Notebook `muestreo_sit2.ipynb` corriendo `N_POR_CLASE = 1000`. ETA ~7 h.
+**Situación 2**: ✓ muestreo completo. 5,000 tiles balanceados con pre-filtrado SCL GPU, O₃ relajado a p95 + SCL>0.3 (31 fechas únicas, justificado por Fishman 2010). Pendiente: subir como `edwardsx/geovision-tiles-sit2` + entrenamiento CLIP+SAE.
 **Situación 3**: ⏸ pendiente.
 
 ---
@@ -163,6 +163,9 @@ Documentadas en `docs/JUSTIFICACIONES.md` con tabla de decisiones y trade-offs:
 | 2026-05-16 | SCL ≥ 0.3 (relajado de 0.5) | Nubosidad tropical 60-80 % | `JUSTIFICACIONES.md` |
 | 2026-05-16 | Contexto ERA5+MODIS pre-computado en meta | Acelera Sit 3 | `JUSTIFICACIONES.md` |
 | 2026-05-16 | `N_POR_CLASE = 1000` (5,000 tiles totales) | Holgura para Recall@5≥0.85 y N>5×features en AFC | `FLUJO_PROYECTO.md` |
+| 2026-05-16 | Pre-filtrado SCL GPU (1 vez, cache en CSV) | Veg/urbano pasaron de 4%/7% a 42%/58% aceptación | `MUESTREO_SIT2.md` |
+| 2026-05-16 | O₃ umbral p95 + SCL>0.3 (vs p99 + SCL>0.5) | p99+0.5 dio solo 11 fechas únicas (81% en top-5); p95+0.3 da 31 fechas | `MUESTREO_SIT2.md` |
+| 2026-05-16 | Dataset separado `edwardsx/geovision-tiles-sit2` | Evita reemplazar el panel base (83 GiB) al subir versión | `MUESTREO_SIT2.md` |
 
 ---
 

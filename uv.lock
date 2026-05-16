@@ -1212,6 +1212,22 @@ wheels = [
 ]
 
 [[package]]
+name = "kagglehub"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "kagglesdk" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d9/3c/4d0cef65da767f2ec57a1c1c77e28d91378150652b69e6ceec99798709b5/kagglehub-1.0.1.tar.gz", hash = "sha256:eae33eba423de222cf3993d99f5b33c5ff25f33d9ee8efe64236b479462c3c54", size = 117354, upload-time = "2026-04-28T22:08:47.935Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/70/14/7b1f40778a4c8930f46b5841902647396069ccaa21cb8e0779ee822ffa77/kagglehub-1.0.1-py3-none-any.whl", hash = "sha256:003b7f725cbd64cc852a84fd840cf1e1594c2aa13d72f8090ed6e4e178a65166", size = 70636, upload-time = "2026-04-28T22:08:46.878Z" },
+]
+
+[[package]]
 name = "kagglesdk"
 version = "0.1.23"
 source = { registry = "https://pypi.org/simple" }
@@ -1963,6 +1979,7 @@ dependencies = [
     { name = "google-cloud-storage" },
     { name = "huggingface-hub" },
     { name = "kaggle" },
+    { name = "kagglehub" },
     { name = "pypdf" },
     { name = "python-dotenv" },
     { name = "rioxarray" },
@@ -1980,6 +1997,7 @@ requires-dist = [
     { name = "google-cloud-storage", specifier = ">=3.10.1" },
     { name = "huggingface-hub", specifier = ">=1.14.0" },
     { name = "kaggle", specifier = ">=2.1.2" },
+    { name = "kagglehub", specifier = ">=1.0.1" },
     { name = "pypdf", specifier = ">=6.11.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "rioxarray", specifier = ">=0.22.0" },
