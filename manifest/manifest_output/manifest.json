@@ -1,0 +1,500 @@
+{
+  "dataset_id": "geovision_cali_v1",
+  "version": "1.0",
+  "created_at": "2026-05-13T03:26:16.581952+00:00",
+  "creators": "Equipo GeoVision-CLIP Cali — UAO",
+  "project": "GeoVision-CLIP Cali: Estimación de contaminación atmosférica",
+  "repository": {
+    "platform": "HuggingFace Bucket",
+    "id": "yeigen/fuentes-proyecto-3",
+    "url": "https://huggingface.co/datasets/yeigen/fuentes-proyecto-3"
+  },
+  "spatial_extent": {
+    "bbox": [
+      -76.6,
+      3.3,
+      -76.4,
+      3.55
+    ],
+    "crs": "EPSG:4326",
+    "region": "Área metropolitana de Santiago de Cali, Valle del Cauca, Colombia"
+  },
+  "temporal_extent": {
+    "start": "2021-01-01",
+    "end": "2025-12-31"
+  },
+  "summary": {
+    "total_size_bytes": 89731575869,
+    "total_size_gb": 89.732,
+    "total_files": 8847,
+    "n_sources": 7,
+    "meets_50gb_threshold": true
+  },
+  "sources": {
+    "S5P_NO2": {
+      "name": "Sentinel-5P L3 OFFL NO2",
+      "description": "Tropospheric NO2 column density",
+      "format": "Zarr",
+      "path": "copernicus_s5p_offl_l3_no2/panel.zarr",
+      "units": "mol/m^2",
+      "n_files": 216,
+      "size_bytes": 19994313,
+      "size_mb": 19.994,
+      "aggregate_hash_md5": "63eafa192b8e1a4a8b975793105041de",
+      "dimensiones": {
+        "time": 25592,
+        "band": 3,
+        "y": 36,
+        "x": 36
+      },
+      "variables": [
+        "tropospheric_NO2_column_number_density",
+        "NO2_column_number_density",
+        "cloud_fraction"
+      ],
+      "n_variables": 3,
+      "spatial_bbox": [
+        -76.651577,
+        3.304421,
+        -76.301638,
+        3.65436
+      ],
+      "spatial_resolution_deg": 0.009998,
+      "spatial_resolution_km": 1.1098,
+      "temporal_range": [
+        "2020-12-31T23:49:06",
+        "2025-12-31T23:16:51"
+      ],
+      "n_observaciones": 25592,
+      "time_dtype": "<U31"
+    },
+    "S5P_O3": {
+      "name": "Sentinel-5P L3 OFFL O3",
+      "description": "Total column O3 density",
+      "format": "Zarr",
+      "path": "copernicus_s5p_offl_l3_o3/panel.zarr",
+      "units": "mol/m^2",
+      "n_files": 152,
+      "size_bytes": 14820157,
+      "size_mb": 14.82,
+      "aggregate_hash_md5": "324303428baa1dc8c349f1d0da136130",
+      "dimensiones": {
+        "time": 25716,
+        "band": 2,
+        "y": 36,
+        "x": 36
+      },
+      "variables": [
+        "O3_column_number_density",
+        "cloud_fraction"
+      ],
+      "n_variables": 2,
+      "spatial_bbox": [
+        -76.651577,
+        3.304421,
+        -76.301638,
+        3.65436
+      ],
+      "spatial_resolution_deg": 0.009998,
+      "spatial_resolution_km": 1.1098,
+      "temporal_range": [
+        "2020-12-31T23:49:06",
+        "2025-12-31T23:16:51"
+      ],
+      "n_observaciones": 25716,
+      "time_dtype": "<U31"
+    },
+    "S5P_SO2": {
+      "name": "Sentinel-5P L3 OFFL SO2",
+      "description": "SO2 column density",
+      "format": "Zarr",
+      "path": "copernicus_s5p_offl_l3_so2/panel.zarr",
+      "units": "mol/m^2",
+      "n_files": 280,
+      "size_bytes": 8059828,
+      "size_mb": 8.06,
+      "aggregate_hash_md5": "2538a6806e87ebd04145c4c7a8a11536",
+      "dimensiones": {
+        "time": 25829,
+        "band": 2,
+        "y": 36,
+        "x": 36
+      },
+      "variables": [
+        "SO2_column_number_density",
+        "cloud_fraction"
+      ],
+      "n_variables": 2,
+      "spatial_bbox": [
+        -76.651577,
+        3.304421,
+        -76.301638,
+        3.65436
+      ],
+      "spatial_resolution_deg": 0.009998,
+      "spatial_resolution_km": 1.1098,
+      "temporal_range": [
+        "2020-12-31T23:49:06",
+        "2025-12-31T23:16:51"
+      ],
+      "n_observaciones": 25829,
+      "time_dtype": "<U31"
+    },
+    "S2": {
+      "name": "Sentinel-2 L2A harmonized",
+      "description": "Surface reflectance, 13 bands",
+      "format": "Zarr",
+      "path": "copernicus_s2_sr_harmonized/panel.zarr",
+      "units": "reflectance",
+      "n_files": 8102,
+      "size_bytes": 89667054649,
+      "size_mb": 89667.055,
+      "aggregate_hash_md5": "d56b0a756016f8beec127c54921893c3",
+      "dimensiones": {
+        "time": 1552,
+        "band": 13,
+        "y": 3897,
+        "x": 3897
+      },
+      "variables": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5",
+        "B6",
+        "B7",
+        "B8",
+        "B8A",
+        "B9",
+        "B11",
+        "B12",
+        "SCL"
+      ],
+      "n_variables": 13,
+      "spatial_bbox": [
+        -76.650009,
+        3.300051,
+        -76.300026,
+        3.650035
+      ],
+      "spatial_resolution_deg": 9e-05,
+      "spatial_resolution_km": 0.01,
+      "temporal_range": [
+        "2021-01-03T15:26:41",
+        "2025-12-31T15:36:31"
+      ],
+      "n_observaciones": 1552,
+      "time_dtype": "<U38"
+    },
+    "ERA5": {
+      "name": "ECMWF ERA5-Land hourly",
+      "description": "Meteorological reanalysis",
+      "format": "Zarr",
+      "path": "ecmwf_era5_hourly/panel.zarr",
+      "units": "mixed",
+      "n_files": 40,
+      "size_bytes": 4732004,
+      "size_mb": 4.732,
+      "aggregate_hash_md5": "db81e0f09a3ca18f29d1f6bc459d9c3d",
+      "dimensiones": {
+        "time": 43824,
+        "band": 8,
+        "y": 2,
+        "x": 2
+      },
+      "variables": [
+        "temperature_2m",
+        "dewpoint_temperature_2m",
+        "u_component_of_wind_10m",
+        "v_component_of_wind_10m",
+        "boundary_layer_height",
+        "relative_humidity_850hPa",
+        "surface_pressure",
+        "total_precipitation"
+      ],
+      "n_variables": 8,
+      "spatial_bbox": [
+        -76.625351,
+        3.375015,
+        -76.375349,
+        3.625017
+      ],
+      "spatial_resolution_deg": 0.250001,
+      "spatial_resolution_km": 27.7501,
+      "temporal_range": [
+        "2021-01-01T00:00:00",
+        "2025-12-31T23:00:00"
+      ],
+      "n_observaciones": 43824,
+      "time_dtype": "<U11"
+    },
+    "MODIS_AOD": {
+      "name": "MODIS MCD19A2 MAIAC AOD",
+      "description": "Aerosol Optical Depth (PM proxy)",
+      "format": "Zarr",
+      "path": "modis_061_mcd19a2_granules/panel.zarr",
+      "units": "unitless",
+      "n_files": 54,
+      "size_bytes": 16038088,
+      "size_mb": 16.038,
+      "aggregate_hash_md5": "b616dc60b9328acb452462b58e025bd8",
+      "dimensiones": {
+        "time": 1826,
+        "band": 4,
+        "y": 43,
+        "x": 43
+      },
+      "variables": [
+        "Optical_Depth_047",
+        "Optical_Depth_055",
+        "Column_WV",
+        "AOD_QA"
+      ],
+      "n_variables": 4,
+      "spatial_bbox": [
+        -76.653558,
+        3.305971,
+        -76.303808,
+        3.655721
+      ],
+      "spatial_resolution_deg": 0.008327,
+      "spatial_resolution_km": 0.9243,
+      "temporal_range": [
+        "2021-01-01T00:00:00",
+        "2025-12-31T00:00:00"
+      ],
+      "n_observaciones": 1826,
+      "time_dtype": "<U8"
+    },
+    "DAGMA": {
+      "name": "DAGMA / CVC ground truth",
+      "description": "In-situ hourly measurements from monitoring stations",
+      "format": "Parquet + CSV + JSON",
+      "path": "dagma/",
+      "n_files": 3,
+      "size_bytes": 876830,
+      "size_mb": 0.877,
+      "aggregate_hash_md5": "9dcabec1d592888be7377d3e3dd5518d",
+      "fuente_original": "datos.gov.co / SISAIRE consolidado",
+      "dataset_origen": "g4t8-zkc3",
+      "n_estaciones": 10,
+      "contaminantes": [
+        "NO2",
+        "O3",
+        "SO2"
+      ],
+      "temporal_range": [
+        "2020-01-01T00:00:00",
+        "2024-12-31T23:00:00"
+      ],
+      "n_mediciones_total": 107291,
+      "estaciones": [
+        {
+          "estacion_id": 8285,
+          "nombre_est": "BASE AÉREA",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.457128,
+          "longitud": -76.502303,
+          "altitud": 956
+        },
+        {
+          "estacion_id": 30109,
+          "nombre_est": "CAÑAVERALEJO",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.416366,
+          "longitud": -76.549613,
+          "altitud": 975
+        },
+        {
+          "estacion_id": 30110,
+          "nombre_est": "COMPARTIR",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.42826,
+          "longitud": -76.466584,
+          "altitud": 952
+        },
+        {
+          "estacion_id": 30004,
+          "nombre_est": "ERA OBRERO",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.457317,
+          "longitud": -76.506539,
+          "altitud": 968
+        },
+        {
+          "estacion_id": 8777,
+          "nombre_est": "ESTACIÓN YUMBO",
+          "nombre_fgda": "CVC",
+          "municipio": "Yumbo",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.579075,
+          "longitud": -76.489558,
+          "altitud": 950
+        },
+        {
+          "estacion_id": 30111,
+          "nombre_est": "LA ERMITA",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.455514,
+          "longitud": -76.530978,
+          "altitud": 994
+        },
+        {
+          "estacion_id": 8986,
+          "nombre_est": "LA FLORA",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.488218,
+          "longitud": -76.518058,
+          "altitud": 959
+        },
+        {
+          "estacion_id": 8288,
+          "nombre_est": "PANCE",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.304517,
+          "longitud": -76.531252,
+          "altitud": 978
+        },
+        {
+          "estacion_id": 26190,
+          "nombre_est": "TRANSITORIA-NAVARRO",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.417183,
+          "longitud": -76.49496,
+          "altitud": 954
+        },
+        {
+          "estacion_id": 8291,
+          "nombre_est": "UNIVERSIDAD DEL VALLE",
+          "nombre_fgda": "DAGMA",
+          "municipio": "Santiago de Cali",
+          "departamento": "Valle del Cauca",
+          "latitud": 3.377911,
+          "longitud": -76.533811,
+          "altitud": 985
+        }
+      ],
+      "cobertura_estacion_contaminante": [
+        {
+          "nombre_est": "BASE AÉREA",
+          "msfl_code": "O3",
+          "n_mediciones": 7310
+        },
+        {
+          "nombre_est": "BASE AÉREA",
+          "msfl_code": "SO2",
+          "n_mediciones": 7770
+        },
+        {
+          "nombre_est": "CAÑAVERALEJO",
+          "msfl_code": "SO2",
+          "n_mediciones": 5053
+        },
+        {
+          "nombre_est": "COMPARTIR",
+          "msfl_code": "O3",
+          "n_mediciones": 7507
+        },
+        {
+          "nombre_est": "ERA OBRERO",
+          "msfl_code": "O3",
+          "n_mediciones": 6939
+        },
+        {
+          "nombre_est": "ESTACIÓN YUMBO",
+          "msfl_code": "NO2",
+          "n_mediciones": 6246
+        },
+        {
+          "nombre_est": "ESTACIÓN YUMBO",
+          "msfl_code": "O3",
+          "n_mediciones": 16091
+        },
+        {
+          "nombre_est": "ESTACIÓN YUMBO",
+          "msfl_code": "SO2",
+          "n_mediciones": 12035
+        },
+        {
+          "nombre_est": "LA ERMITA",
+          "msfl_code": "SO2",
+          "n_mediciones": 8627
+        },
+        {
+          "nombre_est": "LA FLORA",
+          "msfl_code": "O3",
+          "n_mediciones": 5902
+        },
+        {
+          "nombre_est": "LA FLORA",
+          "msfl_code": "SO2",
+          "n_mediciones": 4165
+        },
+        {
+          "nombre_est": "PANCE",
+          "msfl_code": "O3",
+          "n_mediciones": 5861
+        },
+        {
+          "nombre_est": "TRANSITORIA-NAVARRO",
+          "msfl_code": "O3",
+          "n_mediciones": 4138
+        },
+        {
+          "nombre_est": "TRANSITORIA-NAVARRO",
+          "msfl_code": "SO2",
+          "n_mediciones": 3297
+        },
+        {
+          "nombre_est": "UNIVERSIDAD DEL VALLE",
+          "msfl_code": "O3",
+          "n_mediciones": 6350
+        }
+      ],
+      "unidades": "µg/m^3",
+      "manifest_original": {
+        "fuente": "datos.gov.co / SISAIRE consolidado",
+        "dataset_id_origen": "g4t8-zkc3",
+        "rango_temporal": "2020-01-01 a 2024-12-31",
+        "n_estaciones": 10,
+        "contaminantes": [
+          "NO2",
+          "SO2",
+          "O3"
+        ],
+        "archivos": [
+          {
+            "ruta_relativa": "dagma/dagma_cvc_horario_raw.parquet",
+            "size_bytes": 875339,
+            "md5": "3caa4555df709c4de404ab4696393e98",
+            "n_filas": 107291
+          },
+          {
+            "ruta_relativa": "dagma/estaciones_metadata.csv",
+            "size_bytes": 894,
+            "md5": "7a2b8640e79180cc072663bafc224633",
+            "n_filas": 10
+          }
+        ]
+      }
+    }
+  },
+  "manifest_hash_md5": "95fd112867f0d070a3294919f6907525"
+}
