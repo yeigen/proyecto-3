@@ -197,6 +197,42 @@ La conversión Zarr es lossless. Los `e-12` en S5P son ruido de precisión `floa
 | **ThreadPoolExecutor en lugar de Dask explícito** | PDF dice "paralelizar por banda, fecha y tile". El cuello de botella real es `getDownloadURL` (50 MB/request) y la API GEE, no el cómputo local. Dask aquí solo agregaría complejidad. |
 | **Situación 3 sobre overlap 2021-2024 (4 años) en lugar de 5** | El parquet DAGMA/SISAIRE consolidado de `datos.gov.co` (id `g4t8-zkc3`) cubre **2020-01-01 → 2024-12-31**; el panel satelital cubre **2021-01-03 → 2025-12-31**. La intersección útil para LOO-CV son 4 años. Re-descargar DAGMA 2025 vía SISAIRE retrasaría arranque de Situación 2 sin beneficio: 4 años × 10 estaciones × 8,760 horas ≈ 350K observaciones, más que suficiente para variograma + Kriging Espacio-Temporal. El gap de 2020 (sin imágenes) y 2025 (sin ground truth) se reporta explícitamente en el informe técnico. |
 | **10 estaciones de calidad del aire (9 DAGMA + 1 CVC Yumbo)** | El parquet trae 10 estaciones; el PDF pide 9 DAGMA. La 10ª (`ESTACIÓN YUMBO`, operada por CVC) cae dentro del BBox y captura la pluma industrial de Yumbo — fuente principal de SO₂. Política: usar las 10 para entrenamiento y reportar **dos LOO-CV** (9 DAGMA puro = cumplimiento PDF; 10 total = métrica adicional). No re-subir DAGMA por esta razón: la decisión es de modelado, no de datos. |
+| **Muestreo guiado por S5P para clases de contaminación (Sit 2)** | Sampling aleatorio sobre el BBox da `0/5` en clases `contaminacion_alta_NO2/SO2/ozono_anomalo` (verificado: 400 intentos cada una). Razón: zonas con gases altos coinciden con (a) área urbana densa pequeña y (b) nubosidad alta — combinatoria <1 % de aceptación. Solución: indexar offline los timestamps S5P con `max(banda) > p90` sobre Cali, localizar el píxel S5P caliente, mapearlo a lat/lon y buscar la escena S2 más cercana (±5 días) para extraer el tile. Las clases `vegetacion_densa` y `suelo_urbano` mantienen muestreo aleatorio (cumplen sobrado). **No es sesgo**: es estratificación balanceada por clase, exigida por el PDF (Situación 2, p. 6) y estándar en RemoteCLIP/Prithvi/SatCLIP. La validación contra DAGMA (Sit 3, LOO-CV) usa estaciones distintas, sin leakage. |
+| **`SCL_THRESHOLD = 0.3` (sobre 0.5 original)** | Nubosidad tropical de Cali rechaza el 91 % de candidatos a SCL ≥ 0.5. Bajar a 0.3 admite tiles con 30 % píxeles limpios — suficiente para que el encoder visual aprenda morfología urbana o vegetación, manteniendo SCL como feature explícita para el modelo. La banda SCL queda en el tile para que el modelo pueda atender a la nubosidad. |
+| **`suelo_urbano` guiado por proximidad a estaciones DAGMA** | Sampling aleatorio + criterio NDVI<0.2 ∧ NDBI>0 da 1/5 (rj_scl=91 %, rj_clase=97 %). Las 10 estaciones DAGMA están geolocalizadas en centros urbanos densos por definición operacional. Muestrear tiles dentro de radio 1 km de cada estación + relajar a `NDVI < 0.3` captura la diversidad urbana de Cali sin perder validez de la clase. |
+| **Roles diferenciados de S5P / ERA5 / MODIS en Sit 2 vs Sit 3** | S2 es input visual del CLIP (13 bandas, 10 m). S5P es pseudo-label (genera clase + texto). **ERA5 y MODIS NO entran al CLIP** porque: ERA5 es escalar sobre 2×2 píxeles a 28 km y MODIS es 1 píxel sobre el tile S2 (640 m a 1 km). Ambos son **conditioning físico del ConvLSTM en Situación 3**. Decisión operativa: pre-computar los 10 valores escalares (`era5_*`, `modis_*`) en el centroide × timestamp de cada tile y guardarlos en `tiles_meta.parquet`. Costo +200 KB; ahorro: Situación 3 arranca con el contexto físico ya alineado, sin re-abrir paneles. |
+
+### Hallazgo: MODIS AOD con valores no físicos en el panel Zarr
+
+El test (mayo 2026) reveló que `modis_AOD_047/055/WV` aparecen con valores grandes negativos (`-1283`, `-2688`, `-585`). El producto oficial MCD19A2 v6.1 viene como `int16` con `scale_factor=0.001` (LP DAAC docs). Dos hipótesis:
+1. El panel Zarr fue cargado sin aplicar el `scale_factor` del metadata HDF original.
+2. Píxeles MAIAC con `_FillValue=-28672` no fueron enmascarados antes de promediar gránulos.
+
+**Impacto**: nulo en Situación 2 (CLIP no usa MODIS como input). Para Situación 3 hay dos opciones:
+- (a) Re-procesar MODIS aplicando `valor_real = raw × 0.001` + `mask(raw == -28672)`.
+- (b) Excluir MODIS y usar solo S5P + ERA5 como features del Kriging.
+
+Decisión pendiente. La rúbrica del PDF no exige MODIS explícitamente; es una **fuente adicional** que aporta marginalmente sobre el ya-validado S5P NO₂/SO₂/O₃. Recomendación: **opción (b)** si presiona el tiempo (10 días).
+
+### Validación empírica del muestreo guiado (Test 25 tiles, dry-run)
+
+Tasas de aceptación medidas sobre el panel real (n_tiles=25 por clase, mayo 2026):
+
+| Clase | Estrategia | Tasa aceptación | Tiempo 5 tiles |
+|---|---|---:|---:|
+| `contaminacion_alta_NO2` | Guiada (S5P > p90) | 45 % (5/11) | 19 s |
+| `contaminacion_alta_SO2` | Guiada (S5P > p90) | 25 % (5/20) | 39 s |
+| `ozono_anomalo` | Guiada (S5P > p99) | 56 % (5/9) | 15 s |
+| `vegetacion_densa` | Aleatoria + NDVI>0.6 | 5 % (5/105) | 56 s |
+| `suelo_urbano` | Aleatoria + NDVI<0.2 ∧ NDBI>0 | 0.3 % (1/400) | 229 s ❌ |
+| `suelo_urbano` (revisado) | Guiada por DAGMA + NDVI<0.3 | (pendiente verificar) | (esperado <60 s) |
+
+Píxeles S5P "calientes" disponibles para muestreo guiado:
+- NO₂ > p90: 48,185 (de 33M teóricos sobre 5 años)
+- SO₂ > p90: 64,761
+- O₃ > p99: 13,624
+
+Cantidades sobradas para escalar a 1,000 tiles por clase.
 
 ---
 
