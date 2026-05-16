@@ -34,25 +34,19 @@ google-earth/config.py (configuracion central)
 
 ## Estado actual
 
-Ver [`docs/REVISION_2026-05-10.md`](docs/REVISION_2026-05-10.md) para el estado detallado de ejecucion.
-
 | Componente | Estado |
 |-----------|--------|
-| Exportacion GCS | S2, S5P, ERA5 completos; MODIS pendiente |
-| Zarr S2 | 28.7% — proceso atascado, requiere reescritura |
-| HuggingFace | 20,374 archivos subidos; S5P_SO2/O3 pendientes |
-| Modelado | Pendiente (fase actual = adquisicion) |
+| Exportacion GCS | 6 fuentes completas (raw + Zarr) |
+| HuggingFace | 5 datasets pequeños sincronizados; S2 vive solo en GCS por peso |
+| Situacion 1 | Casi cerrada (panel ≥ 50 GB, lossless verificado) |
+| Situacion 2 | Por iniciar (GeoVision-CLIP + SAE) |
 
 ## Documentacion
 
-- [`docs/DATASETS.md`](docs/DATASETS.md) — catalogo de fuentes con justificaciones
-- [`docs/BANDAS_JUSTIFICACION.md`](docs/BANDAS_JUSTIFICACION.md) — seleccion de bandas
-- [`docs/JUSTIFICACION_FORMATO.md`](docs/JUSTIFICACION_FORMATO.md) — GeoTIFF + Zarr
-- [`docs/JUSTIFICACION_EXPORT_METHOD.md`](docs/JUSTIFICACION_EXPORT_METHOD.md) — getDownloadURL
-- [`docs/PESOS_PIPELINE.md`](docs/PESOS_PIPELINE.md) — analisis de compresion
-- [`docs/REFERENCIAS.md`](docs/REFERENCIAS.md) — referencias academicas y tecnicas
-- [`docs/REVISION_2026-05-08.md`](docs/REVISION_2026-05-08.md) — revision de codigo
-- [`docs/REVISION_2026-05-10.md`](docs/REVISION_2026-05-10.md) — status de procesos en produccion
+- [`docs/DATASETS.md`](docs/DATASETS.md) — catalogo de fuentes con justificacion de bandas
+- [`docs/JUSTIFICACIONES.md`](docs/JUSTIFICACIONES.md) — formato, exportacion, pesos y decisiones tecnicas
+- [`docs/REFERENCIAS.md`](docs/REFERENCIAS.md) — indice de enlaces externos
+- [`docs/conceptos/geotiff-vs-zarr.md`](docs/conceptos/geotiff-vs-zarr.md) — diseño de chunks y benchmarks
 
 ## Requisitos
 

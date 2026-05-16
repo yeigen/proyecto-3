@@ -1,32 +1,36 @@
 # Datasets — GeoVision-CLIP Cali
 
-Documentación de las 6 fuentes satelitales/atmosféricas que integran el panel longitudinal 2021–2026 sobre Cali + corredor industrial Yumbo–Acopi.
+Las 6 fuentes satelitales/atmosféricas que integran el panel longitudinal 2021–2026 sobre Cali + corredor industrial Yumbo–Acopi, junto con la justificación de las bandas incluidas y excluidas en cada caso.
 
 ## Almacenamiento del panel
 
-- **Bucket GCS**: [`gs://fuentes-proyecto-3`](https://console.cloud.google.com/storage/browser/fuentes-proyecto-3) (proyecto `proyecto-analitica-3-495618`)
-- **BBox**: `[-76.65, 3.30, -76.30, 3.65]` (Cali + Yumbo + Acopi, ~38 × 38 km)
-- **Ventana temporal**: `2021-01-01` → `2026-01-01` (5 años, conforme a Situación 1 del [PDF de la asignatura](../proyecto/ProyectoFinal_GeoVisionCLIP_Cali.pdf))
-- **Formato dual**: GeoTIFF (raw, source-of-truth) + Zarr (panel analítico). Justificado en [`JUSTIFICACION_FORMATO.md`](JUSTIFICACION_FORMATO.md)
+- **GCS** ([`gs://fuentes-proyecto-3`](https://console.cloud.google.com/storage/browser/fuentes-proyecto-3)): GeoTIFFs raw (source-of-truth) + `panel.zarr/` de Sentinel-2.
+- **HuggingFace** ([`yeigen/fuentes-proyecto-3`](https://huggingface.co/buckets/yeigen/fuentes-proyecto-3)): `panel.zarr/` de las 5 fuentes pequeñas (S5P NO₂/SO₂/O₃, ERA5, MODIS). S2 vive solo en GCS por peso (~84 GB).
+- **BBox**: `[-76.65, 3.30, -76.30, 3.65]` (Cali + Yumbo + Acopi, ~38 × 38 km).
+- **Ventana temporal**: `2021-01-01` → `2026-01-01` (5 años exactos).
+- **Formato dual** GeoTIFF + Zarr: ver [`JUSTIFICACIONES.md`](JUSTIFICACIONES.md#formato-dual-geotiff--zarr).
 
 ```
 gs://fuentes-proyecto-3/
-├── copernicus_s2_sr_harmonized/
-│   ├── raw/{system_index}__{banda}.tif        # 1 archivo por (imagen, banda)
-│   └── panel.zarr/                            # Zarr 4D (time, band, y, x)
-├── copernicus_s5p_offl_l3_no2/
-│   ├── raw/{system_index}.tif                 # multi-banda
-│   └── batch_NNNN.zarr/                       # Zarr por batch de 50 imágenes
-├── copernicus_s5p_offl_l3_so2/   (idem)
-├── copernicus_s5p_offl_l3_o3/    (idem)
-├── ecmwf_era5_hourly/            (idem)
-└── modis_061_mcd19a2_granules/   (idem)
+├── copernicus_s2_sr_harmonized/      raw/*.tif (por banda) + panel.zarr/
+├── copernicus_s5p_offl_l3_no2/       raw/*.tif + panel.zarr/
+├── copernicus_s5p_offl_l3_so2/       raw/*.tif + panel.zarr/
+├── copernicus_s5p_offl_l3_o3/        raw/*.tif + panel.zarr/
+├── ecmwf_era5_hourly/                raw/*.tif + panel.zarr/
+└── modis_061_mcd19a2_granules/       raw/*.tif + panel.zarr/
 ```
 
-| Comando para listar | |
-|---|---|
-| `gcloud storage ls gs://fuentes-proyecto-3/` | listar prefijos |
-| `gcloud storage du -s gs://fuentes-proyecto-3/` | tamaño total |
+**Resumen del panel** (30 bandas incluidas de 360 disponibles ≈ 8.3%):
+
+| # | Dataset | Bandas | Imágenes raw | Peso GeoTIFF |
+|---|---------|-------:|-------------:|-------------:|
+| 1 | Sentinel-2 MSI L2A | 13 / 26 | 19,400 archivos (1,552 escenas) | 76.99 GB |
+| 2 | Sentinel-5P NO₂ | 3 / 12 | 25,592 | 0.04 GB |
+| 3 | Sentinel-5P SO₂ | 2 / 10 | 25,829 | 0.04 GB |
+| 4 | Sentinel-5P O₃ | 2 / 7 | 25,716 | 0.06 GB |
+| 5 | ERA5 horario | 8 / 292 | 43,824 | 0.09 GB |
+| 6 | MODIS MAIAC | 4 / 13 | 151,558 (gránulos) | 0.02 GB |
+| | **Total** | **30 / 360** | | **77.23 GB** (raw, ≥ 50 GB ✅) |
 
 ---
 
@@ -36,18 +40,16 @@ gs://fuentes-proyecto-3/
 
 **Asset ID**: `COPERNICUS/S2_SR_HARMONIZED` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED))
 
-Imágenes ópticas multiespectrales corregidas a reflectancia de superficie (Level-2A). Núcleo del análisis CLIP+SAE para teledetección de alta resolución. Provee covariables ópticas (NDVI, índices urbanos, sombra) que el modelo cruza con las concentraciones de gases.
+Imágenes ópticas multiespectrales corregidas a reflectancia de superficie (Level-2A). Núcleo del análisis CLIP+SAE; provee covariables ópticas (NDVI, índices urbanos, sombra) que el modelo cruzará con las concentraciones de gases.
 
 | Propiedad | Valor |
 |---|---|
-| Sensor | MultiSpectral Instrument (MSI) en Sentinel-2A/2B/2C — ESA Copernicus |
-| Resolución espacial | 10 m (B2-B4, B8), 20 m (B5-B7, B8A, B11, B12, SCL), 60 m (B1, B9) |
+| Sensor | MultiSpectral Instrument (MSI) en Sentinel-2A/2B/2C — ESA |
+| Resolución nativa | 10 m (B2-B4, B8), 20 m (B5-B7, B8A, B11-B12, SCL), 60 m (B1, B9) |
 | Revisita | 5 días (combinando 2A+2B) |
-| Bandas catálogo | 26 disponibles, 13 incluidas |
-| Fechas en panel | 2021-01-01 → 2026-01-01 |
-| Imágenes en panel | **1,552** (intersección con BBox, sin filtro de nubosidad) |
-| Peso GeoTIFF | ~77 GB |
-| Peso Zarr (proyectado) | ~87 GB (zstd/c5/bitshuffle, chunks 5×13×974×974) |
+| Imágenes en panel | 1,552 escenas (BBox + ventana 2021-2026) |
+| Peso GeoTIFF | 76.99 GB |
+| Peso Zarr | ~87 GB (zstd c5 bitshuffle, chunks 5×13×974×974) |
 
 ### Bandas incluidas (13 / 26)
 
@@ -67,18 +69,23 @@ Imágenes ópticas multiespectrales corregidas a reflectancia de superficie (Lev
 | `B12` | 20 m | 2190 nm | SWIR 2 — agua y minerales |
 | `SCL` | 20 m | — | Scene Classification (nubes, sombras, vegetación, suelo, agua) |
 
-> **Nota**: el PDF pide *"13 bandas (B2-B12)"*, pero B2-B12 son 11 bandas (B10 no existe en L2A). Incluimos B1 (aerosol) y SCL (control de calidad) para completar 13. Justificación detallada en [`BANDAS_JUSTIFICACION.md`](BANDAS_JUSTIFICACION.md).
+> El PDF pide "13 bandas (B2-B12)", pero B2-B12 son 11 bandas (B10 no existe en L2A). Incluimos B1 (aerosol) y SCL (control de calidad) para completar 13.
+
+### Bandas excluidas (13 / 26)
+
+| Banda | Motivo |
+|---|---|
+| `AOT`, `WVP` | Subproductos de corrección atmosférica, no reflectancia |
+| `TCI_R`, `TCI_G`, `TCI_B` | Imagen RGB pre-renderizada (visualización, no científica) |
+| `MSK_CLDPRB`, `MSK_SNWPRB` | Máscaras probabilísticas redundantes con QA60 |
+| `QA10`, `QA20` | Banderas de calidad, no variables geofísicas |
+| `MSK_CLASSI_OPAQUE`, `MSK_CLASSI_CIRRUS`, `MSK_CLASSI_SNOW_ICE` | Clasificaciones de nubes redundantes con SCL |
 
 ### Decisión: resampleo a 10 m
 
-Todas las bandas se descargan con `getDownloadURL(scale=10)` → GEE las resamplea **en el servidor** con interpolación bilineal antes de entregar. Resultado: shape unificado `(13, 3897, 3897)` por imagen.
+Todas las bandas se descargan con `getDownloadURL(scale=10)` → GEE resamplea **server-side** con interpolación bilineal antes de entregar. Resultado: shape unificado `(13, 3897, 3897)` por imagen.
 
-**Por qué**: la entrada del encoder ViT-B/32 de CLIP (Situación 2) requiere tensores con todas las bandas alineadas. Mantener resoluciones nativas requeriría alineación manual posterior, que termina siendo el mismo resampleo en cliente. Es la práctica estándar (RemoteCLIP, Prithvi, Satlas, GEE catalog default). B1/B9 reportan información de 60m representada en grilla de 10m (replicación, no invención de info).
-
-**Referencias**:
-- [Sentinel-2 User Handbook (ESA)](https://sentinel.esa.int/documents/247904/685211/Sentinel-2_User_Handbook)
-- [Sentinel-2 MSI Technical Guide](https://sentiwiki.copernicus.eu/web/s2-mission)
-- [GEE Projections and Reprojection](https://developers.google.com/earth-engine/guides/projections)
+**Por qué**: la entrada del encoder ViT-B/32 de CLIP (Situación 2) requiere tensores con todas las bandas alineadas. Mantener resoluciones nativas requeriría alineación manual posterior, que termina siendo el mismo resampleo en cliente. Es la práctica estándar (RemoteCLIP, Prithvi, Satlas, GEE catalog default). B1/B9 reportan información de 60 m representada en grilla de 10 m (replicación, no invención).
 
 ---
 
@@ -92,24 +99,31 @@ Columna troposférica de NO₂ medida por TROPOMI. Principal contaminante asocia
 
 | Propiedad | Valor |
 |---|---|
-| Sensor | TROPOMI (TROPOspheric Monitoring Instrument), Sentinel-5P / ESA |
+| Sensor | TROPOMI / Sentinel-5P / ESA |
+| Algoritmo | DOAS (Differential Optical Absorption Spectroscopy) |
 | Resolución | 1113 m (0.01°) — re-grilla L3 |
 | Resolución nativa L2 | 3.5 × 5.5 km |
-| Algoritmo | DOAS (Differential Optical Absorption Spectroscopy) |
+| Revisita | Diaria (1–2 órbitas) |
 | Disponible desde | 2018-06-28 |
 | Imágenes en panel | 25,592 |
-| Bandas seleccionadas | 3 (de 12) |
 
-| Banda | Unidad | Uso |
+### Bandas incluidas (3 / 12)
+
+| Banda | Unidad | Justificación |
 |---|---|---|
 | `tropospheric_NO2_column_number_density` | mol/m² | **Variable principal**. Columna troposférica vertical |
 | `NO2_column_number_density` | mol/m² | Columna total (tropo + estrato). Permite derivar fracción troposférica |
 | `cloud_fraction` | 0–1 | Filtro de calidad |
 
-**Referencias**:
-- [Sentinel-5P TROPOMI Mission Page (ESA)](https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-5p)
-- [Algorithm Theoretical Basis Document (ATBD) NO2](https://sentiwiki.copernicus.eu/web/document-library#DocumentLibrary-S5P-RELEVANTDOCUMENTS)
-- [TROPOMI L3 OFFL NO2 GEE catalog](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_NO2)
+### Bandas excluidas (9 / 12)
+
+| Banda | Motivo |
+|---|---|
+| `stratospheric_NO2_column_number_density` | NO₂ estratosférico, no afecta calidad del aire superficial |
+| `NO2_slant_column_number_density` | Columna inclinada sin corregir, intermedio del DOAS |
+| `tropopause_pressure` | Parámetro auxiliar del algoritmo |
+| `absorbing_aerosol_index` | Producto de aerosoles, no de NO₂ |
+| `sensor_altitude/azimuth/zenith_angle`, `solar_azimuth/zenith_angle` | Geometría de órbita y sol |
 
 ---
 
@@ -119,22 +133,31 @@ Columna troposférica de NO₂ medida por TROPOMI. Principal contaminante asocia
 
 **Asset ID**: `COPERNICUS/S5P/OFFL/L3_SO2` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_SO2))
 
-Columna vertical de SO₂. En Cali proviene de fuentes antropogénicas (refinerías Yumbo, industria pesada) y aporta a la formación de aerosoles de sulfato.
+Columna vertical de SO₂. En Cali proviene de fuentes antropogénicas (refinerías Yumbo, industria pesada) y contribuye a la formación de aerosoles de sulfato.
 
 | Propiedad | Valor |
 |---|---|
 | Resolución | 1113 m (0.01°) |
 | Resolución nativa L2 | 3.5 × 5.5 km |
 | Disponible desde | 2018-12-05 |
-| Imágenes en panel | 25,830 |
-| Bandas seleccionadas | 2 (de 10) |
+| Imágenes en panel | 25,829 |
 
-| Banda | Unidad | Uso |
+### Bandas incluidas (2 / 10)
+
+| Banda | Unidad | Justificación |
 |---|---|---|
-| `SO2_column_number_density` | mol/m² | Variable principal |
-| `cloud_fraction` | 0–1 | Filtro de calidad |
+| `SO2_column_number_density` | mol/m² | Variable principal (DOAS sobre SO₂) |
+| `cloud_fraction` | 0–1 | Control de calidad |
 
-**Referencias**: [Sentinel-5P SO2 GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_SO2) · [TROPOMI SO2 ATBD](https://sentinels.copernicus.eu/web/sentinel/technical-guides/sentinel-5p/products-algorithms)
+### Bandas excluidas (8 / 10)
+
+| Banda | Motivo |
+|---|---|
+| `SO2_slant_column_number_density` | Columna inclinada cruda, intermedio DOAS |
+| `SO2_column_number_density_amf` | Air Mass Factor, factor de corrección |
+| `SO2_column_number_density_15km` | SO₂ a 15 km (plumas volcánicas, no superficial) |
+| `absorbing_aerosol_index` | Producto de aerosoles, no de SO₂ |
+| `sensor_azimuth/zenith_angle`, `solar_azimuth/zenith_angle` | Geometría de órbita y sol |
 
 ---
 
@@ -149,55 +172,73 @@ Columna total de O₃ (algoritmo GODFIT). En la troposfera es contaminante nociv
 | Propiedad | Valor |
 |---|---|
 | Resolución | 1113 m (0.01°) |
+| Algoritmo | GODFIT |
 | Disponible desde | 2018-09-08 |
-| Imágenes en panel | 25,717 |
-| Bandas seleccionadas | 2 (de 7) |
+| Imágenes en panel | 25,716 |
 
-| Banda | Unidad | Uso |
+### Bandas incluidas (2 / 7)
+
+| Banda | Unidad | Justificación |
 |---|---|---|
 | `O3_column_number_density` | mol/m² | Variable principal (algoritmo GODFIT) |
-| `cloud_fraction` | 0–1 | Filtro de calidad |
+| `cloud_fraction` | 0–1 | Control de calidad |
 
-**Referencias**: [Sentinel-5P O3 GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_O3) · [TROPOMI O3 ATBD](https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-5p-tropomi)
+### Bandas excluidas (5 / 7)
+
+| Banda | Motivo |
+|---|---|
+| `O3_effective_temperature` | Parámetro interno del algoritmo, no medición independiente |
+| `sensor_azimuth/zenith_angle`, `solar_azimuth/zenith_angle` | Geometría de órbita y sol |
 
 ---
 
 ## 5. ECMWF ERA5 — Reanálisis Atmosférico Horario
 
-![ERA5](../imagenes-referencias/ERA5-Land-Hourly.png)
+![ERA5](../imagenes-referencias/ERA5.png)
 
 **Asset ID**: `ECMWF/ERA5/HOURLY` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_HOURLY))
 
-Reanálisis climático global de 5ª generación de ECMWF. Combina modelos físicos con observaciones para producir variables atmosféricas horarias.
+Reanálisis climático global de 5ª generación de ECMWF en niveles simples (2D). Combina modelos físicos con observaciones para producir variables atmosféricas horarias.
+
+> **Por qué ERA5 atmosférico y no ERA5-Land**: el PDF menciona ERA5-Land (9 km), pero ese dataset **no contiene** `boundary_layer_height` ni `relative_humidity` — son variables atmosféricas, no de superficie terrestre. Usamos `ECMWF/ERA5/HOURLY` (27.8 km) que sí contiene ambas, conservando las variables que el PDF solicita explícitamente.
 
 | Propiedad | Valor |
 |---|---|
-| Resolución | 27,830 m (0.25°) — grilla nativa |
+| Resolución | 27,830 m (0.25°) |
+| Periodicidad | Horaria |
 | Cobertura | Global |
 | Disponible desde | 1940-01-01 |
-| Imágenes en panel | 34,499 (horarias) |
-| Bandas seleccionadas | 8 (de 292) |
+| Imágenes en panel | 43,824 (horarias × 5 años) |
 
-| Banda | Unidad | Uso |
+### Bandas incluidas (8 / 292)
+
+| Banda | Unidad | Justificación |
 |---|---|---|
 | `temperature_2m` | K | Temperatura — dispersión atmosférica |
 | `dewpoint_temperature_2m` | K | Punto de rocío — derivación de RH (Magnus) |
-| `u_component_of_wind_10m` | m/s | Viento este (transporte horizontal) |
+| `u_component_of_wind_10m` | m/s | Viento este — transporte horizontal |
 | `v_component_of_wind_10m` | m/s | Viento norte |
 | `boundary_layer_height` | m | **BLH** — crítica para modelado de dispersión |
 | `relative_humidity_850hPa` | % | RH a ~1500 m — formación de aerosoles secundarios |
 | `surface_pressure` | Pa | Presión — corrección de columnas |
 | `total_precipitation` | m | Lavado por lluvia (remoción de contaminantes) |
 
-> **Decisión clave**: el PDF pide ERA5-**Land** pero ese dataset **no contiene `boundary_layer_height` ni `relative_humidity`** (es un downscale de superficie a 9 km). Usamos ERA5 atmosférico horario (`ECMWF/ERA5/HOURLY`) que sí los contiene. Trade-off: 27.8 km vs 9 km de resolución, a cambio de las variables que el PDF solicita explícitamente.
+### Bandas excluidas (284 / 292)
 
-> **Sobre el BBox**: ERA5 entrega bounds [-76.75, 3.25, -76.25, 3.75] (0.5° × 0.5°) en lugar de [-76.65, 3.30, -76.30, 3.65]. **No es ruido**, es la grilla nativa de 0.25°: el BBox de Cali no cae exactamente en la grilla, GEE entrega la matriz 2×2 que cubre el área completa. Recortarlo más agresivo perdería cobertura.
+| Categoría | Ejemplos | Motivo |
+|---|---|---|
+| Variables oceánicas | `sea_surface_temperature`, `ice_temperature_layer_1-4` | Cali no es zona costera |
+| Nieve | `snow_depth`, `snow_albedo`, `snowfall` | Cali no tiene nieve |
+| Lagos | `lake_*_temperature`, `lake_ice_depth` | Irrelevante para calidad del aire |
+| Radiación | `surface_net_solar/thermal_radiation`, `surface_uv_radiation` | No requeridas |
+| Viento otras alturas | `u/v_component_of_wind_100m`, `wind_gust` | El proyecto pide viento a 10 m |
+| Precipitación por tipo | `convective/large_scale_precipitation/snowfall` | Usamos `total_precipitation` (suma) |
+| Evaporación | `mean_evaporation_rate`, `potential_evaporation` | No requeridas |
+| Estrés y ondas | `turbulent_surface_stress`, `gravity_wave_stress` | Dinámica fina no requerida |
+| Suelo | `soil_temperature_level_1-4`, `volumetric_soil_water_layer_1-4` | Variables de superficie terrestre |
+| Otras | `skin_temperature`, `mean_sea_level_pressure`, `runoff` | No requeridas |
 
-**Referencias**:
-- [ERA5 hourly data on single levels (Copernicus C3S)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels)
-- [ERA5 documentation (ECMWF)](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation)
-- [ECMWF/ERA5/HOURLY GEE catalog](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_HOURLY)
-- [ERA5 vs ERA5-Land comparison](https://confluence.ecmwf.int/display/CKB/ERA5-Land%3A+data+documentation)
+> **Sobre el BBox**: ERA5 entrega bounds `[-76.75, 3.25, -76.25, 3.75]` (0.5° × 0.5°) en lugar del recorte solicitado. Es la grilla nativa de 0.25°: el BBox de Cali no cae exactamente en la grilla, GEE entrega la matriz 2×2 que cubre el área completa.
 
 ---
 
@@ -207,46 +248,45 @@ Reanálisis climático global de 5ª generación de ECMWF. Combina modelos físi
 
 **Asset ID**: `MODIS/061/MCD19A2_GRANULES` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES))
 
-Profundidad óptica de aerosoles del algoritmo MAIAC (Multi-Angle Implementation of Atmospheric Correction) sobre MODIS Terra+Aqua. **Proxy** de material particulado PM₂.₅/PM₁₀ a nivel superficie.
+Profundidad óptica de aerosoles del algoritmo MAIAC (Multi-Angle Implementation of Atmospheric Correction) sobre MODIS Terra + Aqua. **Proxy** de material particulado PM₂.₅/PM₁₀ a nivel superficie.
 
 | Propiedad | Valor |
 |---|---|
 | Sensor | MODIS Terra + MODIS Aqua / NASA |
 | Algoritmo | MAIAC v6.1 (NASA Goddard) |
 | Resolución | 927 m (~1 km) |
-| Cobertura | Global |
 | Disponible desde | 2000-02-24 |
-| Imágenes en panel | en descarga (MODIS son swaths múltiples por día) |
-| Bandas seleccionadas | 4 (de 13) |
+| Imágenes en panel | 151,558 gránulos crudos → agrupados por fecha en `panel.zarr` |
 
-| Banda | Unidad | Uso |
+### Bandas incluidas (4 / 13)
+
+| Banda | Unidad | Justificación |
 |---|---|---|
-| `Optical_Depth_047` | 0.001 | AOD a 0.47 μm (azul) — banda primaria |
+| `Optical_Depth_047` | 0.001 | AOD a 0.47 μm (azul) — banda primaria, proxy PM |
 | `Optical_Depth_055` | 0.001 | AOD a 0.55 μm (verde) — validación cruzada |
 | `Column_WV` | 0.001 | Columna de vapor de agua — afecta aerosoles higroscópicos |
 | `AOD_QA` | bitfield | Banderas de calidad — filtro de píxeles confiables |
 
-> **Sobre los archivos vacíos**: MODIS son **swaths**, no global daily. Muchos gránulos pasan por el footprint del BBox pero el raster sobre Cali es mayoritariamente `_FillValue=-28672` o uint8 todo cero. **No es bug**, es la realidad del producto: los gránulos son segmentos de la órbita MODIS y solo algunos cubren Cali con datos válidos. El manifest final filtra los que no aportan información.
+### Bandas excluidas (9 / 13)
 
-**Referencias**:
-- [MAIAC ATBD (NASA Goddard)](https://atmosphere-imager.gsfc.nasa.gov/sites/default/files/ModAtmo/MAIAC_ATBD_v1.pdf)
-- [MCD19A2 v061 product page (NASA LP DAAC)](https://lpdaac.usgs.gov/products/mcd19a2v061/)
-- [MODIS MCD19A2 GEE catalog](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES)
+| Categoría | Motivo |
+|---|---|
+| QA flags internos MAIAC | Máscaras nube/nieve/agua, redundantes con `AOD_QA` |
+| Parámetros del modelo de aerosoles | Fracción modo fino/grueso, internos del algoritmo |
+| Incertidumbre de la recuperación | Diagnóstico, no variable de entrada |
+| Ángulos de visión MODIS | Geometría del sensor |
+
+> **Sobre archivos vacíos**: MODIS son swaths, no global daily. Muchos gránulos pasan por el BBox pero el raster sobre Cali es mayoritariamente `_FillValue=-28672` o uint8 todo cero. No es bug — es la realidad del producto. El script `modis_a_zarr.py:procesar_fecha` agrupa los gránulos del mismo día y promedia (reduce los 151,558 raw a una serie diaria coherente).
 
 ---
 
 ## DAGMA / SISAIRE (Ground Truth puntual)
 
-**Fuente**: [SISAIRE — Sistema de Información sobre Calidad del Aire (IDEAM)](http://sisaire.ideam.gov.co)
+9 estaciones del DAGMA monitoreando NO₂, SO₂, O₃ in-situ con periodicidad horaria. Sirve como **leave-one-out cross-validation** del modelo Kriging Espacio-Temporal (Situación 3).
 
-9 estaciones del DAGMA (Departamento Administrativo de Gestión del Medio Ambiente de Cali) monitoreando NO₂, SO₂, O₃ in-situ con periodicidad horaria. Sirve como **leave-one-out cross-validation** del modelo Kriging Espacio-Temporal (Situación 3).
+La red cubre solo 9 puntos sobre 564 km², dejando amplias zonas sin monitoreo (laderas, zona industrial Yumbo–Acopi). El modelo geoespacial proyecta estos 9 valores a una superficie continua usando los embeddings CLIP como información auxiliar.
 
-**Por qué es relevante**: la red DAGMA cubre solo 9 puntos sobre 564 km², dejando amplias zonas sin monitoreo (laderas, zona industrial Yumbo–Acopi). El modelo geoespacial proyecta estos 9 valores a una superficie continua usando los embeddings CLIP como información auxiliar.
-
-**Referencias**:
-- [Resolución 2254 de 2017 (Min. Ambiente)](https://www.minambiente.gov.co/wp-content/uploads/2021/10/resolucion-2254-de-2017.pdf) — niveles permisibles
-- [Reportes SISAIRE](http://sisaire.ideam.gov.co)
-- [DAGMA Cali](https://www.cali.gov.co/dagma/)
+**Fuentes**: [SISAIRE — IDEAM](http://sisaire.ideam.gov.co) · [DAGMA Cali](https://www.cali.gov.co/dagma/) · [Resolución 2254 de 2017](https://www.minambiente.gov.co/wp-content/uploads/2021/10/resolucion-2254-de-2017.pdf) (niveles permisibles).
 
 ---
 
@@ -255,39 +295,23 @@ Profundidad óptica de aerosoles del algoritmo MAIAC (Multi-Angle Implementation
 ```python
 import xarray as xr
 
-# --- Desde HF Bucket (recomendado) ---
-# Instalar: pip install huggingface_hub[hf_xet]
-s2_url = "https://yeigen-fuentes-proyecto-3.hf.space/copernicus_s2_sr_harmonized/panel.zarr"
-ds_s2 = xr.open_zarr(s2_url, consolidated=True)
-print(ds_s2)
+# Desde HF Bucket (5 datasets pequeños)
+base = "https://huggingface.co/buckets/yeigen/fuentes-proyecto-3"
+ds_era5 = xr.open_zarr(f"{base}/ecmwf_era5_hourly/panel.zarr", consolidated=False)
+
+# Desde GCS (todos, incluido S2)
+import gcsfs
+fs = gcsfs.GCSFileSystem()
+ds_s2 = xr.open_zarr(
+    fs.get_mapper("fuentes-proyecto-3/copernicus_s2_sr_harmonized/panel.zarr"),
+    consolidated=True,
+)
 # Dimensions: (time: 1552, band: 13, y: 3897, x: 3897)
 
-# Cálculo de NDVI al vuelo
+# NDVI al vuelo
 red = ds_s2["data"].sel(band="B4")
 nir = ds_s2["data"].sel(band="B8")
 ndvi = (nir.astype("float32") - red) / (nir + red)
-
-# --- Desde GCS (alternativa) ---
-import gcsfs
-fs = gcsfs.GCSFileSystem()
-
-# Sentinel-2: panel consolidado 4D
-ds_s2 = xr.open_zarr(fs.get_mapper(
-    "fuentes-proyecto-3/copernicus_s2_sr_harmonized/panel.zarr"
-), consolidated=True)
-
-# S5P NO2 por batch
-ds_no2 = xr.open_zarr(fs.get_mapper(
-    "fuentes-proyecto-3/copernicus_s5p_offl_l3_no2/batch_0001.zarr"
-), consolidated=True)
 ```
 
-## Referencias generales
-
-- [PDF de la asignatura](../proyecto/ProyectoFinal_GeoVisionCLIP_Cali.pdf) — Situación 1, p. 3-4
-- [`JUSTIFICACION_FORMATO.md`](JUSTIFICACION_FORMATO.md) — por qué GeoTIFF + Zarr
-- [`BANDAS_JUSTIFICACION.md`](BANDAS_JUSTIFICACION.md) — justificación banda por banda
-- [Zarr v3 specification](https://zarr-specs.readthedocs.io/en/latest/v3/core/v3.0.html)
-- [xarray docs](https://docs.xarray.dev/)
-- [Pangeo: Cloud Native Geospatial](https://pangeo.io/)
-- [Cloud Optimized GeoTIFF spec](https://www.cogeo.org/)
+Enlaces oficiales de cada dataset en [`REFERENCIAS.md`](REFERENCIAS.md). Justificaciones técnicas del formato, pesos y método de exportación en [`JUSTIFICACIONES.md`](JUSTIFICACIONES.md).

@@ -22,7 +22,7 @@ archivo.tif
 
 ### Cloud Optimized GeoTIFF (COG)
 
-Un COG es un GeoTIFF donde los tiles internos están ordenados secuencialmente y las_overviews existen, permitiendo HTTP GET con Range requests (bytes=inicio-fin) sin descargar todo el archivo. GEE exporta COGs por defecto.
+Un COG es un GeoTIFF donde los tiles internos están ordenados secuencialmente y las overviews existen, permitiendo HTTP GET con Range requests (bytes=inicio-fin) sin descargar todo el archivo. GEE exporta COGs por defecto.
 
 ### Limitación fundamental para series temporales
 
@@ -134,7 +134,7 @@ Datos: Sentinel-2 L2A, tile T18NUJ, imagen 20210106T152641, ~3900×3900 píxeles
 | Zarr + zstd c5 bitshuffle | chunk | 2.31 MB | 12.6x | Bitshuffle explota exponente float32 |
 | Zarr + LZ4 c5 | chunk | 3.97 MB | 7.3x | LZ4 débil sobre sparse |
 
-**El GeoTIFF LZW de GEE comprime данныe sparse mejor que cualquier codec Zarr**. Pero esto es irrelevante porque:
+**El GeoTIFF LZW de GEE comprime datos sparse mejor que cualquier codec Zarr**. Pero esto es irrelevante porque:
 
 1. El peso total del panel ya cumple el umbral de ≥50 GB con solo los GeoTIFFs (76.99 GB).
 2. El Zarr no busca comprimir mejor que el GeoTIFF. Busca **reestructurar el acceso**.
@@ -274,7 +274,7 @@ Otras opciones de y_chunk:
 |---|---|---|
 | `time_chunk` | 5 | Kriging lee series de ~5-30 pasos. 5 steps/batch = 312 chunks temporales (pocos), pero cada chunk contiene una secuencia de 5 timestamps útil para LSTM. |
 | `band_chunk` | 13 (todas) | Índices espectrales (NDVI, AOD, color) operan sobre múltiples bandas simultáneamente. Mantener las 13 bandas en 1 chunk evita lecturas extra. |
-| `y_chunk = x_chunk` | 974 | Genera 4×4 = 16 chunks espaciales. Puzorra exactitud en bordes: Zarr soporta chunks irregulares. Tamaño sin comprimir ~235 MB → ~15-30 MB comprimido. |
+| `y_chunk = x_chunk` | 974 | Genera 4×4 = 16 chunks espaciales. Bordes irregulares: Zarr soporta chunks de tamaño variable. Tamaño sin comprimir ~235 MB → ~15-30 MB comprimido. |
 | Compressor | blosc/zstd/c5/bitshuffle | Mejor ratio sobre float32 con NaN. Bitshuffle explota la estructura de exponentes IEEE 754. Nivel 5 equilibra ratio y velocidad. |
 
 ---
@@ -300,7 +300,7 @@ Otras opciones de y_chunk:
 
 **Situación 1 — Pipeline de ingesta**: la conversión GeoTIFF → Zarr es el paso final del pipeline. El Zarr es outputs, el GeoTIFF es source-of-truth. Ambos se almacenan. Costo: ~$3.28/mes en GCS Standard para 164 GB.
 
-**Situación 2 — ConvLSTM para predicción de contaminación**: el modelo lee secuencias temporales de imágenes satelitales para predecir NO₂/SO₂/O₃. Con Zarr, una época de entrenamiento que muestrea subregiones de `5×13×256×256` lee solo 4 chunks espaciales (974×974 × 4). Con GeoTIFF, abriría 5 archivos de ~4 MB cada uno por banda, total 65 archivos开放的 por minibatch. No viable en entrenamiento distribuido.
+**Situación 2 — ConvLSTM para predicción de contaminación**: el modelo lee secuencias temporales de imágenes satelitales para predecir NO₂/SO₂/O₃. Con Zarr, una época de entrenamiento que muestrea subregiones de `5×13×256×256` lee solo 4 chunks espaciales (974×974 × 4). Con GeoTIFF, abriría 5 archivos de ~4 MB cada uno por banda, total 65 archivos abiertos por minibatch. No viable en entrenamiento distribuido.
 
 **Situación 3 — Kriging Espacio-Temporal**: lee `pixel[t1:t2, :, j, i]` para interpolar series en puntos sin monitor. Con Zarr, esto toca `(312 time_chunks × 1 band_chunk × 1 y_chunk × 1 x_chunk) = 312` chunks. Con GeoTIFF, requiere abrir 1552 archivos y leer 1 píxel de cada uno. El overhead de I/O hace el Kriging prohibitivo (~1552 seeks vs ~312).
 
