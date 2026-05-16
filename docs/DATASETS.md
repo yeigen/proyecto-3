@@ -4,10 +4,12 @@ Las 6 fuentes satelitales/atmosféricas que integran el panel longitudinal 2021�
 
 ## Almacenamiento del panel
 
-- **GCS** ([`gs://fuentes-proyecto-3`](https://console.cloud.google.com/storage/browser/fuentes-proyecto-3)): GeoTIFFs raw (source-of-truth) + `panel.zarr/` de Sentinel-2.
-- **HuggingFace** ([`yeigen/fuentes-proyecto-3`](https://huggingface.co/buckets/yeigen/fuentes-proyecto-3)): `panel.zarr/` de las 5 fuentes pequeñas (S5P NO₂/SO₂/O₃, ERA5, MODIS). S2 vive solo en GCS por peso (~84 GB).
+- **Kaggle Dataset** (consumo principal, T4 GPU): [`juanjoseorozcolopez/geovision-fuentes`](https://www.kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes) — 8,848 archivos · 83.6 GiB · publicado 2026-05-14. Contiene los 6 `panel.zarr/` + DAGMA in-situ. Es la fuente que el equipo usa para Situación 2 y 3.
+- **GCS** ([`gs://fuentes-proyecto-3`](https://console.cloud.google.com/storage/browser/fuentes-proyecto-3)): GeoTIFFs raw (source-of-truth) + `panel.zarr/` de Sentinel-2. Fuente upstream del Kaggle Dataset.
+- **HuggingFace** ([`yeigen/fuentes-proyecto-3`](https://huggingface.co/buckets/yeigen/fuentes-proyecto-3)): `panel.zarr/` de las 5 fuentes pequeñas. Backup público.
 - **BBox**: `[-76.65, 3.30, -76.30, 3.65]` (Cali + Yumbo + Acopi, ~38 × 38 km).
-- **Ventana temporal**: `2021-01-01` → `2026-01-01` (5 años exactos).
+- **Ventana temporal del panel satelital**: `2021-01-01` → `2026-01-01` (5 años).
+- **Ventana DAGMA ground truth**: `2020-01-01` → `2024-12-31` (overlap útil con panel satelital = 4 años, 2021-2024).
 - **Formato dual** GeoTIFF + Zarr: ver [`JUSTIFICACIONES.md`](JUSTIFICACIONES.md#formato-dual-geotiff--zarr).
 
 ```
@@ -31,6 +33,48 @@ gs://fuentes-proyecto-3/
 | 5 | ERA5 horario | 8 / 292 | 43,824 | 0.09 GB |
 | 6 | MODIS MAIAC | 4 / 13 | 151,558 (gránulos) | 0.02 GB |
 | | **Total** | **30 / 360** | | **77.23 GB** (raw, ≥ 50 GB ✅) |
+
+### Inventario verificado del panel Zarr (Kaggle Dataset, 2026-05-14)
+
+Shapes leídos directamente de cada `panel.zarr/.zmetadata` con la API de Kaggle:
+
+| Fuente | Shape `(time, band, y, x)` | Chunks | Compresor | Periodo cubierto |
+|---|---|---|---|---|
+| Sentinel-2 | `(1552, 13, 3897, 3897)` | `(5, 13, 974, 974)` | blosc/zstd c5 bitshuffle | 2021-01-03 → 2025-12-31 |
+| S5P NO₂ | `(25592, 3, 36, 36)` | `(6398, 1, 9, 9)` | blosc/lz4 c5 | 2020-12-31 → 2025-12-31 |
+| S5P SO₂ | `(25829, 2, 36, 36)` | `(3229, 1, 9, 9)` | blosc/lz4 c5 | 2020-12-31 → 2025-12-31 |
+| S5P O₃ | `(25716, 2, 36, 36)` | `(6429, 1, 9, 9)` | blosc/lz4 c5 | 2020-12-31 → 2025-12-31 |
+| ERA5 horario | `(43824, 8, 2, 2)` | `(21912, 4, 1, 1)` | blosc/lz4 c5 | 2021-01-01 → 2025-12-31 |
+| MODIS MAIAC | `(1826, 4, 43, 43)` | `(100, 4, 43, 43)` | blosc/lz4 c5 | 2021-01-01 → 2025-12-31 |
+
+- **MODIS está pre-agrupado por día**: 151,558 gránulos brutos colapsados a 1,826 días (5 años × 365.2) con promedio sobre swaths válidos.
+- **S5P NO₂ tiene 3 bandas** (`tropospheric_NO2_column_number_density`, `NO2_column_number_density`, `cloud_fraction`); SO₂/O₃ tienen 2 cada uno (columna principal + `cloud_fraction`).
+- Total Kaggle: **8,848 archivos · 83.6 GiB**.
+
+### DAGMA / SISAIRE ground truth (carpeta `dagma/` del Kaggle Dataset)
+
+| Archivo | Tamaño | Contenido |
+|---|---:|---|
+| `dagma_cvc_horario_raw.parquet` | 875 KB | **107,291 filas**, 10 estaciones × 5 años × 3 contaminantes, cadencia horaria |
+| `estaciones_metadata.csv` | 894 B | Coordenadas y operador (DAGMA / CVC) de las 10 estaciones |
+| `manifest_ground_truth.json` | 597 B | MD5 y conteo de filas |
+
+**10 estaciones en total** (no 9 como sugiere el PDF), todas dentro del BBox `[-76.65, 3.30, -76.30, 3.65]`:
+
+| Estación | Lat (°N) | Lon (°W) | Operador | Zona |
+|---|---:|---:|---|---|
+| BASE AÉREA | 3.4571 | -76.5023 | DAGMA | Centro Cali |
+| CAÑAVERALEJO | 3.4164 | -76.5496 | DAGMA | Sur Cali |
+| COMPARTIR | 3.4283 | -76.4666 | DAGMA | Este Cali |
+| ERA OBRERO | 3.4573 | -76.5065 | DAGMA | Centro |
+| **ESTACIÓN YUMBO** | 3.5791 | -76.4896 | **CVC** | Yumbo (industrial) |
+| LA ERMITA | 3.4555 | -76.5310 | DAGMA | Oeste centro |
+| LA FLORA | 3.4882 | -76.5181 | DAGMA | Norte Cali |
+| PANCE | 3.3045 | -76.5313 | DAGMA | Sur extremo |
+| TRANSITORIA-NAVARRO | 3.4172 | -76.4950 | DAGMA | Sureste |
+| UNIVERSIDAD DEL VALLE | 3.3779 | -76.5338 | DAGMA | Sur |
+
+**Origen del parquet**: `datos.gov.co / SISAIRE consolidado` (dataset id `g4t8-zkc3`). Cubre **2020-01-01 → 2024-12-31**.
 
 ---
 

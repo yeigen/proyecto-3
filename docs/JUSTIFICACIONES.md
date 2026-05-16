@@ -195,6 +195,8 @@ La conversión Zarr es lossless. Los `e-12` en S5P son ruido de precisión `floa
 | **Chunks Zarr `(5, 13, 974, 974)`** | 4,992 data chunks (bajo el límite HF de 10K), 15–30 MB comprimido por chunk (sweet spot HTTP Range), 5 timestamps por chunk útil para ConvLSTM. |
 | **`zstd c5 + bitshuffle` sobre LZ4** | 2.65× vs 1.77× sobre datos densos S2. Bitshuffle explota IEEE 754. 400-600 MB/s de escritura es suficiente. |
 | **ThreadPoolExecutor en lugar de Dask explícito** | PDF dice "paralelizar por banda, fecha y tile". El cuello de botella real es `getDownloadURL` (50 MB/request) y la API GEE, no el cómputo local. Dask aquí solo agregaría complejidad. |
+| **Situación 3 sobre overlap 2021-2024 (4 años) en lugar de 5** | El parquet DAGMA/SISAIRE consolidado de `datos.gov.co` (id `g4t8-zkc3`) cubre **2020-01-01 → 2024-12-31**; el panel satelital cubre **2021-01-03 → 2025-12-31**. La intersección útil para LOO-CV son 4 años. Re-descargar DAGMA 2025 vía SISAIRE retrasaría arranque de Situación 2 sin beneficio: 4 años × 10 estaciones × 8,760 horas ≈ 350K observaciones, más que suficiente para variograma + Kriging Espacio-Temporal. El gap de 2020 (sin imágenes) y 2025 (sin ground truth) se reporta explícitamente en el informe técnico. |
+| **10 estaciones de calidad del aire (9 DAGMA + 1 CVC Yumbo)** | El parquet trae 10 estaciones; el PDF pide 9 DAGMA. La 10ª (`ESTACIÓN YUMBO`, operada por CVC) cae dentro del BBox y captura la pluma industrial de Yumbo — fuente principal de SO₂. Política: usar las 10 para entrenamiento y reportar **dos LOO-CV** (9 DAGMA puro = cumplimiento PDF; 10 total = métrica adicional). No re-subir DAGMA por esta razón: la decisión es de modelado, no de datos. |
 
 ---
 
