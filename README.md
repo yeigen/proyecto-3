@@ -43,8 +43,11 @@ google-earth/config.py (configuracion central)
 
 ## Documentacion
 
+- [`docs/HANDOFF.md`](docs/HANDOFF.md) — **estado actual + plan completo para retomar (leer primero)**
 - [`docs/DATASETS.md`](docs/DATASETS.md) — catalogo de fuentes con justificacion de bandas
 - [`docs/JUSTIFICACIONES.md`](docs/JUSTIFICACIONES.md) — formato, exportacion, pesos y decisiones tecnicas
+- [`docs/FLUJO_PROYECTO.md`](docs/FLUJO_PROYECTO.md) — cronologia y decisiones por fecha
+- [`docs/MUESTREO_SIT2.md`](docs/MUESTREO_SIT2.md) — pipeline de muestreo y resultados full N=1000/clase
 - [`docs/REFERENCIAS.md`](docs/REFERENCIAS.md) — indice de enlaces externos
 - [`docs/conceptos/geotiff-vs-zarr.md`](docs/conceptos/geotiff-vs-zarr.md) — diseño de chunks y benchmarks
 
