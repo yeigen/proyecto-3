@@ -211,9 +211,14 @@ Una pasada sobre las 1,552 escenas S2 (band SCL) calculó el % de píxeles váli
 
 | Umbral SCL escena | Escenas que pasan | % del total | Uso |
 |---|---:|---:|---|
-| > 0.7 | ~20 | 1.3 % | demasiado estricto |
-| > 0.5 | 66 | 4.3 % | corrida inicial (diversidad temporal pobre en O₃) |
-| **> 0.3** | **140** | **9.0 %** | **final — usado en O₃ relajado** |
+| ≥ 0.7 | 17 | 1.1 % | demasiado estricto |
+| ≥ 0.5 | 66 | 4.3 % | corrida inicial (diversidad temporal pobre en O₃) |
+| ≥ 0.3 | **136** | **8.8 %** | **final — usado en O₃ relajado** |
+| ≥ 0.2 | 221 | 14.2 % | alternativa más permisiva (no usado) |
+| ≥ 0.1 | 438 | 28.2 % | alternativa muy permisiva (no usado) |
+
+> **Conteos verificados sobre `scl_por_escena.csv` en bloque 2b del EDA (2026-05-17)**.
+> Distribución por tile MGRS de las 136: **T18NUJ aporta 133 (97.8%), T18NUK solo 3 (2.2%).** T18NUK está casi excluido del muestreo. Ver `docs/EDA_HALLAZGOS.md` sección 1 para implicaciones.
 
 Tiempo cómputo SCL: 22 min en T4 (4 s por batch de 5 escenas). Cache persiste
 para corridas futuras.
