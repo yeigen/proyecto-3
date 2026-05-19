@@ -22,15 +22,17 @@ Una imagen no es "alta o baja resolución" en abstracto. Es que cada píxel cubr
 
 ## Comparación lado a lado de las 6 fuentes del proyecto
 
-Tomamos el BBox del proyecto `[-76.65, 3.30, -76.30, 3.65]` (Cali + Yumbo + Acopi, ~38 × 38 km) y vemos cuántos píxeles caben:
+Tomamos el BBox **efectivo** del Zarr del proyecto (~39 × 39 km, declarado en `google-earth/config.py` y ampliado por buffer durante la descarga) y vemos cuántos píxeles caben. Las cifras de "píxeles que cubren Cali" se leyeron directamente de los `panel.zarr` cargados con `xarray`:
 
-| Fuente | Resolución por píxel | Píxeles que cubren Cali | Cómo se ve |
+| Fuente | Resolución por píxel | Píxeles del Zarr | Cómo se ve |
 |---|---|---:|---|
 | **Sentinel-2** | 10 m | 3,897 × 3,897 = **15.2 M** | Nítido, casas individuales |
-| **MODIS MAIAC** | 927 m (~1 km) | 43 × 43 = 1,849 | Pixelado, barrios visibles |
-| **Sentinel-5P L3** | 1,113 m | 36 × 35 = 1,260 | Pixelado, distritos visibles |
-| **Sentinel-5P L2 nativo** | 3,500 × 5,500 m | 11 × 7 ≈ 77 | Muy pixelado, ciudad como puñado de cuadros |
+| **MODIS MAIAC** | ~1 km | ~40 × 40 ≈ 1,600 | Pixelado, barrios visibles |
+| **Sentinel-5P L3** | 1,113 m | ~36 × 35 ≈ 1,260 | Pixelado, distritos visibles |
+| **Sentinel-5P L2 nativo** | 3,500 × 5,500 m | ~11 × 7 ≈ 77 | Muy pixelado, ciudad como puñado de cuadros |
 | **ERA5** | 27,830 m (0.25°) | 2 × 2 = 4 | Cali entera en un puñado de píxeles |
+
+> Conteos exactos de cada fuente: ver bloque 2 del notebook `scripts/eda/eda_completo.py` (`inspeccionar_dataset(ds, ...)` imprime `dim {y, x}` por fuente).
 
 > Pasar de Sentinel-2 a ERA5 es como pasar de Google Maps en zoom máximo a la silueta de Colombia en un mapa mundial. **No es peor calidad: es otra escala de fenómeno**.
 

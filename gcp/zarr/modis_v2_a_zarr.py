@@ -53,7 +53,7 @@ FUENTE = 'MODIS/061/MCD19A2_GRANULES'
 PREFIJO = FUENTE.replace('/', '_').lower()
 BUCKET = 'fuentes-proyecto-3'
 RAW_PREFIX = f'{PREFIJO}/raw'
-ZARR_PREFIX = f'{PREFIJO}/panel_v2.zarr'
+ZARR_PREFIX = f'{PREFIJO}/panel_v3.zarr'
 
 MODIS_FILL = -28672
 MODIS_SCALE = 0.001
@@ -68,15 +68,30 @@ cliente = storage.Client(project=PROJECT_ID)
 bucket_gcs = cliente.bucket(BUCKET)
 
 
+TILE_MODIS_CALI = 'h10v08'
+
+
 def agrupar_por_fecha(blobs):
+    """Agrupa TIFFs por fecha, descartando gránulos MODIS que no cubren Cali.
+
+    El export GEE de MCD19A2 bajó gránulos de TODO el cinturón ecuatorial
+    (h10..h20 v17/v08); solo h10v08 cubre Cali. Los demás vienen como uint8
+    con valores 0 (no aplican -28672 fill porque uint8 no representa el rango),
+    y al promediarlos contaminan diluyendo el mean hacia 0. Filtramos por nombre.
+    """
     grupos = defaultdict(list)
+    descartados = 0
     for b in blobs:
         fname = os.path.basename(b.name)
         if not fname.endswith('.tif'):
             continue
+        if TILE_MODIS_CALI not in fname:
+            descartados += 1
+            continue
         parts = fname.replace('.tif', '').split('_')
         fecha = parts[1]
         grupos[fecha].append(b.name)
+    log.info(f'Filtro tile {TILE_MODIS_CALI}: descartados {descartados} TIFFs no-Cali')
     return sorted(grupos.items(), key=lambda x: x[0])
 
 

@@ -57,7 +57,7 @@ Sentinel-2A y 2B son satélites idénticos con órbitas separadas 180°. Cada un
 
 ### Pero solo unos días tienen datos útiles
 
-El BBox de Cali es cruzado por 3 tiles (T18NUH, T18NUJ, T18NUK). En 5 años acumulamos **1,552 escenas** sobre el BBox completo. Eso son ~310 días de S2/año, lo cual coincide con `5 años × 365 / 5.9 ≈ 309`. El proyecto **no filtra por nubosidad** en este conteo — todas las escenas, con o sin nubes, están incluidas (S2 sobre Cali tiene mucha nube por ser zona tropical húmeda).
+El BBox de Cali es cruzado por **2 tiles MGRS** (T18NUJ y T18NUK, verificado contra `panel.zarr` en bloque 2 del EDA — ver `docs/EDA_HALLAZGOS.md`). En 5 años acumulamos **1,552 escenas** sobre el BBox completo (779 + 773, distribución 50/50). El proyecto **no filtra por nubosidad** en este conteo — todas las escenas, con o sin nubes, están incluidas (S2 sobre Cali tiene mucha nube por ser zona tropical húmeda). Tras pre-filtrado por SCL > 0.3, solo ~140/1552 (9%) escenas son usables.
 
 > Esto importa para Situación 2: el modelo CLIP debe aprender a tolerar nubes (usando la banda SCL para identificarlas), no a filtrarlas. Filtrar reduciría drásticamente el dataset.
 
