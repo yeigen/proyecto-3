@@ -39,6 +39,10 @@ Las 8 bandas ERA5 del proyecto y por qué cada una importa.
 
 - [`geotiff-vs-zarr.md`](geotiff-vs-zarr.md) — cómo se almacenan los datos, diseño de chunks, benchmarks de compresión.
 
+## 7. Conceptos de muestreo y modelado (Situación 2)
+
+- [`tiles-y-percentiles.md`](tiles-y-percentiles.md) — qué es un tile (64×64×13), por qué ese tamaño, qué es un percentil (p90/p95/p99), por qué bajamos a p95 para O₃.
+
 ---
 
 ## Sugerencia para defender la Situación 1
