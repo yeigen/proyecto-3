@@ -800,6 +800,43 @@ Valores in-situ en **µg/m³** (unidad SISAIRE estándar). Boxplots sin outliers
 2. **¿SO₂ mediana 0.00 en estación 30109 (Cañaveralejo)?** Posible problema del sensor. Confirmar antes de incluirla en LOO-CV o excluirla con justificación.
 3. **¿Cómo manejar la heterogeneidad de cobertura (Yumbo 80.9% vs mediana 17%)?** Reportar LOO-CV ponderado o restringido a estaciones con ≥ 20% cobertura.
 
+### Excel SVCASC — fuente complementaria (cruce vs parquet)
+
+El archivo `dagma/dagma-cristian.xlsx` (23 MB) contiene una exportacion del sistema SVCASC (Sistema de Vigilancia de Calidad del Aire de Santiago de Cali) en formato ancho (87 columnas, 52,632 filas, periodo 2020-2025).
+
+**Estructura original:** filas 22-24 contienen los encabezados multi-nivel (estacion, variable, unidad). Los datos inician en fila 25. Formato: estaciones en columnas, cada una con sub-columnas por contaminante/meteorologia.
+
+**Datos nuevos que el parquet no tiene:**
+
+| Variable | Mediciones | Estaciones |
+|---|---|---|
+| PM10 | 284,815 | 8 |
+| PM25 | 140,646 | 8 |
+| H2S | 79,773 | 3 |
+| Temperatura | 165,475 | 9 |
+| Humedad | 156,848 | 9 |
+| Vel/Dir Viento | ~139K c/u | 6 |
+| Lluvia | 242,327 | 7 |
+| Radiacion Solar | 149,053 | 6 |
+| Presion Baromet | 98,180 | 6 |
+
+**Hallazgos de limpieza:**
+- "Base Aerea" y "Base Aérea" son la misma estacion (tilde inconsistente). Unificadas.
+- "Presion Baromet _NEF" duplicado de Presion Baromet (7,881 registros). Descartado.
+- "UV-PM" solo 4,715 registros erraticos (max 28,623). Descartado.
+- Lluvia: 75 valores negativos de 242,327 (0.03%). Filtrados.
+- Black Carbon: media 3,310 (unidad distinta, probablemente ng/m3 vs ug/m3 del resto).
+- Dataset limpio exportado a `csv/dagma_excel_limpio.csv` (2,001,365 registros, 14 variables, 9 estaciones).
+
+**Cruce parquet vs Excel (35,184 registros coincidentes):**
+
+| Variable | n | Correlacion r | Diferencia media | Mediana dif | p75 dif |
+|---|---|---|---|---|---|
+| O3 | 20,449 | **0.387** | 20.88 ug/m3 | 9.38 | 22.95 |
+| SO2 | 14,735 | **0.091** | 7.45 ug/m3 | 3.09 | 7.04 |
+
+**Veredicto:** Las fuentes NO son consistentes para NO2/SO2/O3. La correlacion SO2 es practicamente nula (r=0.091) y O3 es baja (r=0.387). Se recomienda usar el parquet (SISAIRE oficial) como ground truth para estos contaminantes, y el Excel como fuente complementaria para PM2.5/PM10 y meteorologia. NO2 en Excel solo en Univalle (25,158 mediciones); en parquet solo en Yumbo (6,246). Combinados darian 2 estaciones de NO2, insuficiente para LOO-CV pero mejor que 1.
+
 ## 6. Tiles muestreados Sit 2 — bloque 7
 
 ### Estructura del dataset

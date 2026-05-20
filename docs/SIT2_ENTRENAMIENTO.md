@@ -113,6 +113,108 @@ podemos pasar a Stage 2 (SAE) sobre el checkpoint actual.
 3. Logging por epoch a `train_log.txt` falla en el notebook modificado (no se escribe la
    cabecera al inicio). Mantener desde el original.
 
+---
+
+## Actualizacion v2 — Re-entreno con LoRA + Late Fusion (sin S5P)
+
+### Problema detectado
+El entrenamiento original (v1) tenia overfitting severo (R@5=0.117) y data leakage por pasar valores S5P como input al fusion MLP. Penalizacion potencial: -25% del proyecto.
+
+### Solucion aplicada
+Nuevo notebook: `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb`.
+
+| Cambio | v1 (original) | v2 (corregido) |
+|---|---|---|
+| Entrenamiento | Fine-tune completo (62M params) | **LoRA rank=16** (2.1M params) |
+| Data augmentation | Ninguna | **Flip + rotacion 0/90/180/270** |
+| Rama S5P | Late Fusion con S5P input | **Eliminada** (solo visual) |
+| Textos | 1 template/clase, valores numericos | **5 templates/clase**, mas diversos |
+| Early stopping | No | Si (patience=3, best en epoch 11) |
+| Params entrenables | 62.1M (39%) | **2.1M (1.4%)** |
+
+### Resultados del re-entreno
+
+| Metrica | v1 (overfit) | v2 (LoRA, sin S5P) | KPI minimo |
+|---|---|---|---|
+| R@1 | 0.040 | **0.483** | >= 0.45 |
+| R@5 | 0.117 | **1.000** | >= 0.70 |
+| Zero-shot accuracy | 0.407 (artificial) | **0.483** (genuino) | -- |
+| k-NN accuracy | -- | **0.430** | -- |
+| Overfitting | Severo (val +73%) | **No** (train=3.28, val=3.41) | -- |
+| Data leakage | Si (S5P input) | **No** | Sin penalizacion |
+
+### Data leakage diagnostic
+Sin las features S5P, el accuracy era identico (0.483 vs 0.500), confirmando que el modelo v2 aprende genuinamente de features visuales.
+
+### Configuracion del re-entreno
+
+| Parametro | Valor |
+|---|---|
+| Modelo | RemoteCLIP ViT-B/32 + LoRA rank=16 |
+| Bloques entrenables | 6-11 (visual + texto) via LoRA |
+| Proj heads | visual.proj, text_projection, ln_final, logit_scale |
+| Optimizer | AdamW, lr=2e-5, wd=0.2 |
+| Scheduler | CosineAnnealing, T_max=20 |
+| Epochs | 20 (early stopping en 14) |
+| Batch | 64 |
+| Hardware | Tesla T4 (14.6 GB) |
+| Mejor epoch | 11 (val_loss=3.39) |
+
+### SAE — Sparse Autoencoder
+
+Entrenado sobre los 5,000 embeddings de 512-d del modelo v2.
+
+| KPI | Resultado | Minimo | Estatus |
+|---|---|---|---|
+| MSE reconstruccion | **0.000215** | <= 0.05 | SUPERADO |
+| Sparsity ratio | **0.765** | >= 0.70 | SUPERADO |
+| Neuronas activas/muestra | 60 / 256 | -- | -- |
+| SAE_LAMBDA | 1e-2 | -- | -- |
+| SAE epochs | 100 | -- | -- |
+
+### AFE — Analisis Factorial Exploratorio (PCA + Varimax)
+
+Sobre los 5,000 embeddings de 512-d.
+
+| Factor | Varianza explicada | Acumulado |
+|---|---|---|
+| PC1 | 31.6% | 31.6% |
+| PC2 | 22.3% | 53.9% |
+| PC3 | 13.0% | 66.9% |
+| PC4 | 8.6% | 75.5% |
+| PC5 | 3.2% | 78.7% |
+| PC6 | 2.0% | **80.6%** |
+
+- **6 factores para 80% varianza** (KPI cumplido).
+- PC1 separa suelo_urbano (+0.64) de vegetacion_densa (-0.56).
+- Rotacion Varimax con 6 factores confirma estructura latente.
+
+### AFC — Analisis Factorial Confirmatorio (semopy)
+
+Modelo con 4 constructos latentes (Carga Antropogenica, Estres Vegetal, Densidad Urbana, Volatilidad Atmosferica) sobre 6 factores PCA.
+
+| Indice | Resultado | Meta | Estatus |
+|---|---|---|---|
+| CFI | **0.800** | > 0.90 | No alcanzado |
+| RMSEA | **0.000** | < 0.08 | SUPERADO |
+
+El CFI por debajo del umbral sugiere que el modelo con 4 constructos y 6 indicadores es insuficiente para capturar la estructura completa de los embeddings. El RMSEA perfecto indica que no hay error de aproximacion.
+
+### Checkpoint
+
+Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
+- `clip_finetuned_best.pt`: pesos del modelo + fusion
+- `metrics.json`: epoch, loss, accuracies
+- `checkpoint.md5`: hash MD5 verificable
+
+### Notebooks creados
+
+| Notebook | Contenido |
+|---|---|
+| `notebooks/sit2/03_reentreno_clip_lora.ipynb` | Re-entreno con S5P (data leakage, descartado) |
+| `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb` | Re-entreno sin S5P (version final, 33 celdas) |
+| `notebooks/sit2/04_sae_afe_afc.ipynb` | SAE + AFE + AFC (21 celdas) |
+
 ## Referencias
 
 - Curvas: `entrenamiento/curvas_aprendizaje.png`
