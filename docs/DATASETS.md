@@ -80,7 +80,7 @@ Shapes leídos directamente de cada `panel.zarr/.zmetadata` con la API de Kaggle
 
 ## 1. Sentinel-2 MSI L2A (Surface Reflectance Harmonized)
 
-![Sentinel-2 MSI](../imagenes-referencias/Sentinel-2-MSI-MultiSpectral-Instrument.png)
+![Sentinel-2 MSI](evidencias/situacion-1/fuentes/fuente_sentinel_2_msi.png)
 
 **Asset ID**: `COPERNICUS/S2_SR_HARMONIZED` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED))
 
@@ -135,7 +135,7 @@ Todas las bandas se descargan con `getDownloadURL(scale=10)` → GEE resamplea *
 
 ## 2. Sentinel-5P TROPOMI — Dióxido de Nitrógeno (NO₂)
 
-![Sentinel-5P NO2](../imagenes-referencias/Sentinel-5P-NO2.png)
+![Sentinel-5P NO2](evidencias/situacion-1/fuentes/fuente_sentinel_5p_no2.png)
 
 **Asset ID**: `COPERNICUS/S5P/OFFL/L3_NO2` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_NO2))
 
@@ -173,7 +173,7 @@ Columna troposférica de NO₂ medida por TROPOMI. Principal contaminante asocia
 
 ## 3. Sentinel-5P TROPOMI — Dióxido de Azufre (SO₂)
 
-![Sentinel-5P SO2](../imagenes-referencias/Sentinel-5P-SO2.png)
+![Sentinel-5P SO2](evidencias/situacion-1/fuentes/fuente_sentinel_5p_so2.png)
 
 **Asset ID**: `COPERNICUS/S5P/OFFL/L3_SO2` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_SO2))
 
@@ -207,7 +207,7 @@ Columna vertical de SO₂. En Cali proviene de fuentes antropogénicas (refiner�
 
 ## 4. Sentinel-5P TROPOMI — Ozono (O₃)
 
-![Sentinel-5P O3](../imagenes-referencias/Sentinel-5P-O3.png)
+![Sentinel-5P O3](evidencias/situacion-1/fuentes/fuente_sentinel_5p_o3.png)
 
 **Asset ID**: `COPERNICUS/S5P/OFFL/L3_O3` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S5P_OFFL_L3_O3))
 
@@ -238,7 +238,7 @@ Columna total de O₃ (algoritmo GODFIT). En la troposfera es contaminante nociv
 
 ## 5. ECMWF ERA5 — Reanálisis Atmosférico Horario
 
-![ERA5](../imagenes-referencias/ERA5.png)
+![ERA5](evidencias/situacion-1/fuentes/fuente_era5.png)
 
 **Asset ID**: `ECMWF/ERA5/HOURLY` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_HOURLY))
 
@@ -288,7 +288,7 @@ Reanálisis climático global de 5ª generación de ECMWF en niveles simples (2D
 
 ## 6. MODIS MCD19A2 — MAIAC Aerosol Optical Depth (AOD)
 
-![MODIS](../imagenes-referencias/MODIS.png)
+![MODIS](evidencias/situacion-1/fuentes/fuente_modis.png)
 
 **Asset ID**: `MODIS/061/MCD19A2_GRANULES` ([catálogo GEE](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES))
 

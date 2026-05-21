@@ -25,7 +25,7 @@ del notebook `scripts/sit2/situacion-2-clip-modificado.ipynb` (versión modifica
 
 ## Curvas de entrenamiento
 
-Imagen: `entrenamiento/curvas_aprendizaje.png`.
+Imagen: `docs/evidencias/situacion-2/entrenamiento/sit2_entrenamiento_curvas_aprendizaje.png`.
 
 | Epoch | Train Loss | Val Loss | R@1 | R@5 | R@10 |
 |---|---|---|---|---|---|
@@ -217,7 +217,7 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 
 ## Referencias
 
-- Curvas: `entrenamiento/curvas_aprendizaje.png`
+- Curvas: `docs/evidencias/situacion-2/entrenamiento/sit2_entrenamiento_curvas_aprendizaje.png`
 - Notebook efectivo: `scripts/sit2/situacion-2-clip-modificado.ipynb`
 - Notebook fuente: `scripts/sit2/01_clip_finetune.py`
 - Eval correcta: `scripts/sit2/01b_eval_classification.py`

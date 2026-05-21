@@ -61,13 +61,13 @@ y luego buscan la escena S2 correspondiente.
 
 ### Distribucion espacial
 
-![Mapa de tiles por clase con estaciones DAGMA](../../imagenes-referencias/eda/tiles/mapa_tiles_estaciones.png)
+![Mapa de tiles por clase con estaciones DAGMA](../evidencias/situacion-2/muestreo/tiles/mapa_tiles_estaciones.png)
 
 suelo_urbano es la clase mas concentrada (desviacion estandar latitud 0.046, longitud 0.022) porque se muestrea alrededor de las estaciones DAGMA en el casco urbano. vegetacion_densa es la mas dispersa (desviacion estandar ~0.098) porque cubre todo el valle. contaminacion_alta_NO2 esta ligeramente mas al norte (media latitud 3.470) por la influencia de Yumbo.
 
 ### Separacion espectral NDVI vs NDBI
 
-![Separacion de clases en espacio NDVI vs NDBI](../../imagenes-referencias/eda/tiles/separacion-clases.png)
+![Separacion de clases en espacio NDVI vs NDBI](../evidencias/situacion-2/muestreo/tiles/separacion-clases.png)
 
 | Clase | NDVI medio | NDBI medio |
 |---|---|---|
@@ -83,7 +83,7 @@ lo que explica por que el CLIP los confunde. El modelo solo puede distinguirlos 
 
 ### Distribucion temporal
 
-![Distribucion temporal por ano](../../imagenes-referencias/eda/tiles/tiles_diversidad_temporal.png)
+![Distribucion temporal por ano](../evidencias/situacion-2/muestreo/tiles/tiles_diversidad_temporal.png)
 
 | Clase | Fechas unicas | Concentracion estacional |
 |---|---|---|
@@ -100,7 +100,7 @@ por ano mitiga este sesgo en la evaluacion.
 
 ### Cobertura MODIS
 
-![Cobertura MODIS por clase](../../imagenes-referencias/eda/tiles/cobertura-modis-tiles.png)
+![Cobertura MODIS por clase](../evidencias/situacion-2/muestreo/tiles/cobertura-modis-tiles.png)
 
 | Variable MODIS | Cobertura promedio | Uso |
 |---|---|---|
@@ -113,7 +113,7 @@ Es inherente al producto, no un error. WV funciona bajo nubosidad parcial y alca
 
 ### Pseudo-labels S5P
 
-![Pseudo-labels S5P por clase](../../imagenes-referencias/eda/tiles/distribucion.seudolabel-modis-tiles.png)
+![Pseudo-labels S5P por clase](../evidencias/situacion-2/muestreo/tiles/distribucion.seudolabel-modis-tiles.png)
 
 Cada pseudo-label solo existe para su clase correspondiente:
 
