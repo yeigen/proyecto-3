@@ -76,15 +76,30 @@ La validación también quedó desbalanceada por clase:
 
 Las métricas CLIP v3 miden separabilidad bajo una distribución mezclada, no generalización temporal o espacial estricta. No hay duplicados exactos, pero sí leakage temporal/espacial suave.
 
-### Mitigación recomendada
+### Mitigación aplicada
 
-Agregar una evaluación complementaria sin reentrenar:
+Se ejecutó una auditoría v4 en `notebooks/sit2/05_clip_v4_group_split.ipynb` con split temporal por fechas completas:
 
-- split por año o por fecha;
-- split espacial por celdas o distancia mínima;
-- reporte de métricas por clase con soporte balanceado.
+| Métrica del split | Resultado |
+|---|---:|
+| Train | 4,531 |
+| Val | 469 |
+| Fechas val | 8 |
+| Fechas compartidas train/val | 0 |
+| Años val | 2021-2024 |
+| Tile MGRS val | T18NUJ |
 
-Si se reentrena, usar split estratificado por clase y grupo temporal (`fecha` o `año`).
+Resultados v4:
+
+| Métrica | Resultado |
+|---|---:|
+| R@1 | 0.386 |
+| R@5 | 1.000 |
+| Zero-shot accuracy | 0.386 |
+| Zero-shot solo visual | 0.401 |
+| k-NN accuracy | 0.394 |
+
+El modelo final sigue siendo v2/v3 porque cumple R@1 >= 0.45 en la validación original. v4 no lo reemplaza, pero muestra que la señal no desaparece bajo validación temporal estricta: R@5 se mantiene en 1.000 y zero-shot queda cerca de 2x chance.
 
 ## 3. S5P como pseudo-label
 
@@ -171,11 +186,12 @@ Para una versión más estricta:
 
 ## Conclusión
 
-La Situación 2 es defendible, pero no debe presentarse como una validación espacial/temporal estricta. El resultado CLIP v3 prueba que los embeddings separan clases bajo el muestreo construido. No prueba todavía que generalicen a años, fechas o zonas no vistas.
+La Situación 2 es defendible si se presenta con dos niveles de evidencia:
 
-Los dos riesgos que más pueden afectar la interpretación son:
+1. v2/v3 como modelo final: cumple los KPIs principales bajo el split original y corrige el data leakage por S5P.
+2. v4 como auditoría temporal: no reemplaza al modelo final, pero muestra robustez parcial cuando no hay fechas compartidas entre train y validación.
 
-1. Split aleatorio global.
-2. Clase O3 basada en columna total con alta nubosidad.
+Los dos riesgos que siguen afectando la interpretación son:
 
-Las métricas actuales deben acompañarse con estas salvedades y, si hay tiempo, con una evaluación complementaria por año o por grupo espacial.
+1. La generalización espacial estricta no fue probada; `suelo_urbano` queda cerca de train por construcción del muestreo DAGMA.
+2. La clase O3 usa columna total con alta nubosidad y puede capturar régimen atmosférico/estacional más que contaminación superficial directa.

@@ -170,7 +170,7 @@ Prueba: evaluar el modelo con y sin las features S5P.
 
 ## Resultados del entrenamiento
 
-| Metrica | v1 (overfit) | v2 (LoRA, sin S5P) | KPI minimo |
+| Metrica | v1 (overfit) | v2/v3 final (LoRA, sin S5P) | KPI minimo |
 |---|---|---|---|
 | Recall@1 | 0.040 | **0.483** | >= 0.45 |
 | Recall@5 | 0.117 | **1.000** | >= 0.70 |
@@ -178,6 +178,34 @@ Prueba: evaluar el modelo con y sin las features S5P.
 | k-NN accuracy | -- | **0.430** | -- |
 | Overfitting | Severo (val +73%) | **No** (train=3.28, val=3.41) | -- |
 | Data leakage | Si (S5P input) | **No** | Sin penalizacion |
+
+### Auditoría v4 con split temporal estricto
+
+Se entrenó una versión v4 en un notebook separado para medir robustez temporal. No reemplaza al modelo final v2/v3; funciona como auditoría metodológica.
+
+Split usado:
+
+| Criterio | Valor |
+|---|---:|
+| Train | 4,531 tiles |
+| Val | 469 tiles |
+| Fechas de validación | 8 |
+| Fechas compartidas train/val | 0 |
+| Años val | 2021, 2022, 2023, 2024 |
+| Tile MGRS val | T18NUJ |
+
+Resultados v4:
+
+| Metrica | Resultado |
+|---|---:|
+| Recall@1 | 0.386 |
+| Recall@5 | 1.000 |
+| Recall@10 | 1.000 |
+| Zero-shot accuracy | 0.386 |
+| Zero-shot solo visual | 0.401 |
+| k-NN accuracy (k=5) | 0.394 |
+
+Lectura: v4 baja frente al modelo final y no supera el KPI de Recall@1 >= 0.45. Aun así, bajo validación temporal sin fechas compartidas mantiene desempeño cercano a 2x chance y Recall@5 perfecto. Por eso se reporta como evidencia de robustez parcial, no como checkpoint principal.
 
 ## SAE — Sparse Autoencoder
 
@@ -240,3 +268,4 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 | `notebooks/sit2/02_tiles_oficial.ipynb` | Exploración de tiles |
 | `notebooks/sit2/03_clip_v3_oficial.ipynb` | Re-entreno final sin S5P |
 | `notebooks/sit2/04_sae_oficial.ipynb` | SAE + AFE + AFC |
+| `notebooks/sit2/05_clip_v4_group_split.ipynb` | Auditoría temporal estricta con split por fechas |

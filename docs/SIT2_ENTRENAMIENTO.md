@@ -189,7 +189,7 @@ Sobre los 5,000 embeddings de 512-d.
 
 ### AFC — Analisis Factorial Confirmatorio (semopy)
 
-Modelo con 4 constructos latentes (Carga Antropogenica, Estres Vegetal, Densidad Urbana, Volatilidad Atmosferica) sobre 6 factores PCA.
+Modelo con 4 constructos latentes (Carga Antropogenica, Estres Vegetal, Densidad Urbana, Volatilidad Atmosferica) usando variables observables de `tiles_meta.parquet`: `ndvi`, `ndbi`, `scl_pct`, ERA5 y `modis_WV`. No se usan los factores PCA como indicadores, porque son ortogonales por construcción.
 
 | Indice | Resultado | Meta | Estatus |
 |---|---|---|---|
@@ -205,6 +205,39 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 - `metrics.json`: epoch, loss, accuracies
 - `checkpoint.md5`: hash MD5 verificable
 
+---
+
+## Auditoría v4 — Split temporal por grupos
+
+Se creó `notebooks/sit2/05_clip_v4_group_split.ipynb` para probar una validación más estricta. Mantiene el modelo LoRA sin S5P, pero separa validación por fechas completas.
+
+Split final:
+
+| Criterio | Valor |
+|---|---:|
+| Train | 4,531 |
+| Val | 469 |
+| Fechas train | 71 |
+| Fechas val | 8 |
+| Fechas compartidas | 0 |
+| Años val | 2021-2024 |
+| Tile MGRS val | T18NUJ |
+
+Resultados:
+
+| Metrica | v2/v3 final | v4 temporal |
+|---|---:|---:|
+| R@1 | 0.483 | 0.386 |
+| R@5 | 1.000 | 1.000 |
+| R@10 | 1.000 | 1.000 |
+| Zero-shot accuracy | 0.500 | 0.386 |
+| Zero-shot solo visual | 0.500 | 0.401 |
+| k-NN accuracy | 0.430 | 0.394 |
+
+Conclusión: v4 no reemplaza al modelo final porque R@1 cae por debajo del KPI de 0.45. Sí reduce la incertidumbre metodológica: aun sin fechas compartidas entre train y validación, el modelo conserva R@5=1.000 y zero-shot cercano a 2x chance.
+
+Checkpoint auxiliar: `edwardsx/geovision-clip-modelo-v4-group-split`.
+
 ### Notebooks creados
 
 | Notebook | Contenido |
@@ -213,6 +246,7 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 | `notebooks/sit2/02_tiles_oficial.ipynb` | Exploración de tiles |
 | `notebooks/sit2/03_clip_v3_oficial.ipynb` | Re-entreno final sin S5P |
 | `notebooks/sit2/04_sae_oficial.ipynb` | SAE + AFE + AFC |
+| `notebooks/sit2/05_clip_v4_group_split.ipynb` | Auditoría temporal estricta v4 |
 
 ## Referencias
 
@@ -220,4 +254,5 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 - Notebook v1 oficial: `notebooks/sit2/01_clip_v1_oficial.ipynb`
 - Notebook CLIP final: `notebooks/sit2/03_clip_v3_oficial.ipynb`
 - Notebook SAE/AFE/AFC: `notebooks/sit2/04_sae_oficial.ipynb`
+- Notebook auditoría temporal v4: `notebooks/sit2/05_clip_v4_group_split.ipynb`
 - Conceptos: `docs/conceptos/clip-y-remoteclip.md`

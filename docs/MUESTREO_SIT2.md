@@ -24,7 +24,7 @@ fue elegida por la naturaleza física y geográfica de la clase, no por convenie
 Usada para las 3 clases de contaminación.
 
 **Algoritmo**:
-1. Indexar los píxeles del panel S5P donde `valor > umbral` (p90 para NO₂/SO₂, p99 para O₃).
+1. Indexar los píxeles del panel S5P donde `valor > umbral` (p90 para NO₂/SO₂, p95 para O₃ en la corrida final).
 2. Permutar aleatoriamente esos píxeles calientes.
 3. Para cada uno: mapear su (lat, lon) y buscar la escena S2 más cercana en ±5 días.
 4. Aplicar jitter espacial de ±200 m (evita centrar siempre en el mismo píxel S5P).
@@ -100,6 +100,7 @@ Contando todos los píxeles del panel S5P que superan el umbral, a lo largo de 5
 | NO₂ > p90 | 4.96e-05 mol/m² | 58,493 |
 | SO₂ > p90 | 2.97e-04 mol/m² | 100,068 |
 | O₃ > p99 | 1.29e-01 mol/m² | 32,846 |
+| O₃ > p95 | 1.27e-01 mol/m² | usado en la corrida final |
 
 Suficientes para los 1,000 tiles por clase del modo full sin reutilizar píxeles.
 
@@ -131,16 +132,11 @@ modis_AOD_047, modis_AOD_055, modis_WV
 ERA5 nunca falla (modelo continuo). MODIS llega al 100 % por nearest-neighbor temporal
 (±12 h máximo dado que MODIS está agrupado a granularidad diaria).
 
-### Caveat: valores MODIS no físicos
+### Nota MODIS
 
-Los `modis_AOD_*` aparecen con valores negativos grandes (e.g. `-1283`, `-2688`).
-El producto MCD19A2 v6.1 oficialmente viene con `scale_factor=0.001`; aparentemente
-el panel Zarr en Kaggle fue construido sin aplicar el escalamiento, o los `_FillValue=-28672`
-no fueron enmascarados antes de la agregación diaria.
+La corrida exploratoria detectó valores MODIS no físicos en versiones antiguas del panel (`panel.zarr` y parte de `panel_v2.zarr`) por escala y `_FillValue`. La versión corregida `panel_v3.zarr` aplica máscara, filtro del tile MODIS `h10v08` y `scale_factor=0.001`.
 
-**Impacto**: cero para Situación 2 (el CLIP no usa MODIS como input visual).
-Para Situación 3 se decide a posteriori: aplicar `valor × 0.001 + mask(== -28672)` o
-excluir MODIS y usar S5P + ERA5 solamente.
+El dataset final `edwardsx/geovision-tiles-sit2` conserva contexto MODIS en rangos físicos: AOD_047 p50≈0.3065, AOD_055 p50≈0.222 y WV p50≈1.7355. Esto no afecta el entrenamiento CLIP porque el modelo final usa solo bandas ópticas Sentinel-2; MODIS queda como contexto para análisis y Situación 3.
 
 ## Distribución temporal observada
 
@@ -242,7 +238,7 @@ para corridas futuras.
 | Suelo urbano | 7 % | **58 %** | 1000/1729 | 9:44 min |
 
 Veg + urbano mejoraron 10× respecto al test gracias al pre-filtrado de escenas:
-solo muestrean sobre las 66/140 escenas limpias, no sobre las 1,552 totales.
+solo muestrean sobre las 136 escenas con SCL ≥ 0.3, no sobre las 1,552 totales.
 
 ### Diversidad temporal final
 
@@ -268,8 +264,7 @@ estabilidad atmosférica). Las otras clases (NO₂/SO₂) tienen emisión contin
 Cada tile = 64×64 px × 10 m = 0.41 km². BBox completo = 1,444 km². Cada fecha
 ocupa solo **0.9 % del área** — no hay redundancia geográfica.
 
-**Sin leakage con Sit 3**: LOO-CV deja una estación entera fuera del train; la
-granularidad de evaluación es por estación, no por fecha.
+**Separación frente a Sit 3**: LOO-CV deja una estación entera fuera del train; la granularidad de evaluación es por estación, no por fecha. Aun así, la auditoría posterior reporta leakage temporal/espacial suave dentro del split CLIP v3, por lo que las métricas de Sit 2 deben leerse como separabilidad bajo distribución mezclada, no como generalización temporal estricta.
 
 Cambio del umbral O₃ de p99 → p95: relajación documentada por la naturaleza
 episódica del fenómeno. p95 sigue capturando "anomalías" según
