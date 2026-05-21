@@ -459,7 +459,7 @@ Fuente: [LAADS DAAC file specification MCD19A2 v6.1](https://ladsweb.modaps.eosd
 - `add_offset` 0.0 (cero, no se aplica).
 - Valid_range físico AOD: **-0.1 a 4.0** (negativos pequeños son ruido válido del retrieval).
 
-**El fix correcto** (a aplicar en script nuevo `gcp/exportar_modis_v2.py`):
+**El fix correcto** (aplicado finalmente en `gcp/zarr/modis_v2_a_zarr.py`):
 
 ```python
 def fix_modis_image(img):
@@ -529,9 +529,9 @@ Esto reduce las opciones reales:
 
 **Acción pendiente para Sit 3:** rebuild del Zarr MODIS aplicando `(raw - add_offset) × scale_factor + mask(_FillValue)` correctamente al exportar los gránulos desde GEE. La fuente está disponible y el script `gcp/exportar_modis.py` (o similar) se puede ajustar.
 
-### Actualización post-fix — MODIS v2 panel construido y validado
+### Actualización intermedia — MODIS v2 construido y luego descartado
 
-Panel reconstruido en `gs://fuentes-proyecto-3/modis_061_mcd19a2_granules/panel_v2.zarr/` aplicando `mask(!= -28672) ANTES de promediar + scale 0.001` (script `gcp/zarr/modis_v2_a_zarr.py`). Subido también a Kaggle como `edwardsx/modis-v2-panel`.
+Primero reconstruimos `panel_v2.zarr` aplicando `mask(!= -28672)` antes de promediar y `scale 0.001`. Esa versión corrigió el fill/scale, pero todavía mezclaba gránulos no-Cali. Por eso quedó como paso intermedio y fue reemplazada por `panel_v3.zarr`.
 
 **Cobertura sobre los 5,000 tiles muestreados (recalculo de contexto físico, run 2026-05-18):**
 
@@ -556,7 +556,7 @@ Fuente algorítmica: MCD19A2 v6.1 — Lyapustin et al., 2018, *MODIS Collection 
 
 ### Segundo bug detectado — contaminación por gránulos no-Cali (descubierto post-rebuild v2)
 
-Tras subir el `panel_v2` y recalcular el contexto sobre los 5,000 tiles, el EDA del panel (sobre 500 escenas aleatorias) seguía mostrando valores AOD anómalamente bajos:
+Tras probar `panel_v2` y recalcular el contexto sobre los 5,000 tiles, el EDA del panel (sobre 500 escenas aleatorias) seguía mostrando valores AOD anómalamente bajos:
 
 - AOD_047 / AOD_055 mean ≈ 0.0005, max ≈ 0.04 — **órdenes de magnitud por debajo** del rango climatológico Cali (~0.1–0.5 background, ~1.0–3.0 eventos de quema).
 - Column_WV mean ≈ 0.05 cm — vs. esperable 2–4 cm en clima tropical húmedo.
@@ -702,7 +702,7 @@ Subido como nueva versión de `edwardsx/geovision-tiles-sit2` (con `scl_por_esce
 | Panel satelital (S2, S5P, ERA5, MODIS) | 2021-01-01 → 2025-12-31 |
 | **Overlap útil** | **2021-01-01 → 2024-12-31 = 4 años** |
 
-**Esto coincide con la decisión #7** ("4 años overlap DAGMA 2021-2024") documentada en `HANDOFF.md`. Implicaciones operativas:
+**Esto coincide con la decisión #7** (4 años de overlap DAGMA 2021-2024), documentada ahora en `JUSTIFICACIONES.md`. Implicaciones operativas:
 
 - **Sit 2 entrenamiento**: usa todo 2021-2025 con S5P como pseudo-label (no necesita DAGMA).
 - **Sit 3 LOO-CV**: solo 2021-2024 contra DAGMA real (4 años).
@@ -1126,7 +1126,7 @@ Con MODIS v3 limpio, los 767 tiles con AOD válido tienen distribución sana (me
 **Por qué NO podemos extender el panel a 2020:**
 
 1. **Decisión #7 está cerrada**: el panel se construyó para 2021-2025. Cambiarlo implica re-bajar ~17 GB de imágenes adicionales × 6 fuentes = re-build completo. ~10-15 h.
-2. **Datasets Kaggle ya subidos**: `juanjoseorozcolopez/geovision-fuentes` (83 GB) tendría que ser re-versionado.
+2. **Datasets Kaggle ya subidos**: `juanjoseorozcolopez/geovision-fuentes` (89.73 GB) tendría que ser re-versionado.
 3. **No mueve la aguja en KPIs Sit 3**: los KPIs del PDF son RMSE LOO-CV, no cantidad de años.
 
 **Cómo aprovechar 2020 de forma honesta:**
@@ -1147,7 +1147,7 @@ Si **bajáramos** la regla del overlap a 2020-2024 (extendiendo panel):
 - SO₂: 6 estaciones, cobertura mejor concentrada en 2020.
 - O₃: 8 estaciones, cobertura mejor concentrada en 2020.
 
-**Conclusión:** extender el panel **NO resuelve el problema fundamental de NO₂** (sigue siendo 1 estación). **Mantener decisión #7 (2021-2024)** y aplicar Mitigación A de `VEREDICTO_DATOS.md`.
+**Conclusión:** extender el panel **NO resuelve el problema fundamental de NO₂** (sigue siendo 1 estación). Mantenemos 2021-2024 y reportamos validación alternativa para NO₂ en Sit 3.
 
 ### Decisiones del proyecto confirmadas por bloque 8
 
@@ -1161,30 +1161,29 @@ Si **bajáramos** la regla del overlap a 2020-2024 (extendiendo panel):
 
 ### Sin preguntas abiertas en bloque 8
 
-El EDA completo está cerrado. Pendiente solo de ejecutar las **mitigaciones operativas** documentadas en `docs/VEREDICTO_DATOS.md`.
+El EDA completo está cerrado. Las mitigaciones vigentes quedan en los documentos activos de cada situación.
 
 ---
 
 ## Cierre del EDA — resumen para defensa
 
-### Sit 1 (Panel) — ✅ cumple
+### Sit 1 (Panel) — cumple
 
-- 1,552 escenas S2 + 25k S5P × 3 + 43,824 ERA5 + 1,826 MODIS + 107k DAGMA = panel sólido.
-- ≥ 50 GB cumplido (83 GB).
-- Pendientes: manifest MD5, diagrama cloud, reporte costos (todos < 4 h).
+- 1,552 escenas S2 + 25k S5P por gas + 43,824 ERA5 + 1,826 MODIS + 107k DAGMA.
+- Kaggle: 89.73 GB. Manifest técnico: 89.732 GB y 8,847 archivos de datos.
+- Manifest MD5 y verificación lossless ya existen. Siguen pendientes el diagrama cloud y el reporte de costos.
 
-### Sit 2 (CLIP+SAE) — ✅ viable
+### Sit 2 (CLIP+SAE) — cerrado
 
-- 5,000 tiles balanceados con coincidencia 100% vs `MUESTREO_SIT2.md`.
-- Separación física clara (NDVI/NDBI medianas distinguibles).
-- Pendiente: entrenamiento.
+- 5,000 tiles balanceados.
+- Modelo final: CLIP + LoRA visual-only, sin S5P como input.
+- KPIs principales cumplidos: R@1=0.483, R@5=1.000, SAE MSE=0.0002, sparsity=0.765, AFC CFI=0.933.
 
-### Sit 3 (DL + Geoestadística) — ⚠ con mitigaciones obligatorias
+### Sit 3 (DL + Geoestadística) — parcialmente cerrado
 
-- 🔴 **Reprocesar MODIS** (decisión #13, mediana −1.237 fuera de valid_range).
-- 🔴 **Validación alternativa NO₂** (1 sola estación con datos).
-- 🟡 **LOO-CV ponderado/restringido** (cobertura heterogénea).
-- 🟡 **Split estratificado por año** (sesgo 2022+2024 en O₃).
+- ConvLSTM converge, pero LOO-CV con ConvLSTM/Ridge da R2 negativo.
+- Kriging Ordinario funciona mejor como línea base: SO2 MAE=5.02 ug/m3, O3 MAE=4.91 ug/m3.
+- NO2 no permite LOO-CV porque solo existe Yumbo. Se documenta validación alternativa.
 
 ### Decisiones empíricamente confirmadas (9)
 
@@ -1203,6 +1202,8 @@ El EDA completo está cerrado. Pendiente solo de ejecutar las **mitigaciones ope
 ### Documentos generados
 
 - [`docs/EDA_HALLAZGOS.md`](EDA_HALLAZGOS.md) — este documento, 7 secciones cerradas.
-- [`docs/VEREDICTO_DATOS.md`](VEREDICTO_DATOS.md) — balance honesto + mitigaciones recomendadas.
+- [`docs/situacion-1/SIT1_PANEL.md`](situacion-1/SIT1_PANEL.md) — cierre del panel satelital.
+- [`docs/situacion-2/SIT2_CLIP_SAE.md`](situacion-2/SIT2_CLIP_SAE.md) — cierre de CLIP + SAE.
+- [`docs/situacion-3/SIT3_RESULTADOS.md`](situacion-3/SIT3_RESULTADOS.md) — cierre parcial de ConvLSTM + Kriging.
 - [`docs/conceptos/tiles-y-percentiles.md`](conceptos/tiles-y-percentiles.md) — defensa conceptual de tiles + percentiles con citas verificadas.
 - Correcciones aplicadas a [`docs/conceptos/resolucion-espacial.md`](conceptos/resolucion-espacial.md) (3897×3897) y [`docs/conceptos/resolucion-temporal-revisita.md`](conceptos/resolucion-temporal-revisita.md) (2 tiles MGRS).

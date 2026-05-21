@@ -69,7 +69,7 @@ Contenido: 5 paneles Zarr pequenos (S5P, ERA5, MODIS). S2 vive solo en GCS por p
 ### Kaggle Dataset (consumo del equipo)
 
 Dataset: [`juanjoseorozcolopez/geovision-fuentes`](https://kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes)
-Volumen: 8,847 archivos · 89.7 GB · 6 fuentes Zarr + DAGMA parquet
+Volumen: 89.73 GB · 8,848 archivos en Kaggle. El manifest técnico registra 8,847 archivos de datos; Kaggle cuenta además `dataset-metadata.json`.
 
 ![Kaggle dataset](/docs/situacion-1/imagenes/kaggle-dataset.png)
 
@@ -143,8 +143,8 @@ SO2 usa un umbral mas permisivo (50% vs 75% de NO2).
 | 13:00 (pico) | 607 m |
 | Amplitud | **factor 9x** |
 
-BLH varfa 9x entre noche y dia. Esto justifica el uso de ERA5 horario sobre ERA5-Land
-(que no contiene BLH). S5P TROPOMI pasa a las ~13:30, exactamente en el pico de mezcla atmosferica.
+BLH varía 9x entre noche y día. Esto justifica el uso de ERA5 horario sobre ERA5-Land
+(que no contiene BLH). S5P TROPOMI pasa a las ~13:30, exactamente en el pico de mezcla atmosférica.
 
 **Vientos predominantes:** v10 medio = -0.62 m/s (vientos del norte).
 Esto confirma que los alisios del NE transportan contaminacion de Yumbo hacia Cali.
@@ -289,19 +289,21 @@ Conversion GeoTIFF -> Zarr verificada bit-perfect:
 ## Manifest
 
 Archivo: `/manifest/manifest_output/manifest.json`
-8,847 archivos, 89.7 GB total, hash MD5 por fuente.
+8,847 archivos de datos, 89.732 GB total, hash MD5 por fuente. La UI de Kaggle muestra 8,848 archivos porque incluye `dataset-metadata.json`.
+
+Nota: el campo global `spatial_extent.bbox` del manifest conserva el BBox original del PDF. Para la defensa usamos el BBox operativo del proyecto `[-76.65, 3.30, -76.30, 3.65]`, confirmado por `google-earth/config.py` y por los bounds reales de las fuentes.
 
 ## Costos cloud
 
-[Pendiente de completar con valores reales]
+El flujo se diseñó para mantener costos bajos usando cuotas académicas y almacenamiento público gratuito donde era viable.
 
-| Servicio | Concepto | Costo estimado |
+| Servicio | Uso en el proyecto | Costo estimado |
 |---|---|---|
-| GEE | Cuotas de exportacion | Gratuito (academico) |
-| GCS | Almacenamiento ~90 GB | ~$2-3/mes |
-| HF Hub | Almacenamiento datasets | Gratuito |
-| Kaggle | Almacenamiento dataset | Gratuito |
-| Kaggle | Computo T4 GPU | Gratuito (30 h/semana) |
+| GEE | Consulta y exportación de imágenes satelitales | Gratuito con cuota académica |
+| GCS | Almacenamiento intermedio de GeoTIFF + Zarr (~90 GB) | ~2-3 USD/mes |
+| HuggingFace Hub | Backup público de paneles pequeños | Gratuito |
+| Kaggle Dataset | Distribución del panel completo al equipo | Gratuito |
+| Kaggle Notebooks | Entrenamiento con GPU T4 | Gratuito dentro de cuota semanal |
 
 ## Tiempo invertido
 

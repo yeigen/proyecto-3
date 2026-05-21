@@ -1,18 +1,19 @@
 """
-Reconstruye el Zarr MODIS aplicando correctamente:
-  - máscara de _FillValue = -28672 ANTES de promediar (bug del script viejo)
+Reconstruye el Zarr MODIS final aplicando:
+  - filtro del tile MODIS h10v08, que cubre Cali
+  - máscara de _FillValue = -28672 antes de promediar
   - scale_factor = 0.001 a las bandas físicas (Optical_Depth_047/055, Column_WV)
-  - AOD_QA se mantiene como bitmask sin escalar
+  - AOD_QA como bitmask sin escalar
 
 Fuente oficial: https://ladsweb.modaps.eosdis.nasa.gov/filespec/MODIS/6/MCD19A2
 
-Lee los mismos TIFFs raw de GCS que el script viejo (sin re-export desde GEE).
-Escribe a un Zarr nuevo `panel_v2.zarr` para no tocar el viejo.
+Lee los TIFFs raw de GCS y escribe `panel_v3.zarr`.
+El nombre del archivo conserva `v2` por historial del fix, pero la salida vigente es v3.
 
 Uso:
     python modis_v2_a_zarr.py
-    python modis_v2_a_zarr.py --max-fechas 50         # smoke test
-    python modis_v2_a_zarr.py --batch-size 50         # ajustar memoria
+    python modis_v2_a_zarr.py --max-fechas 50
+    python modis_v2_a_zarr.py --batch-size 50
 """
 import os
 import sys
@@ -223,9 +224,9 @@ def main():
     blob_names_por_fecha = {f: names for f, names in fechas_dict}
     fechas = [f for f, _ in fechas_dict]
 
-    log.info(f'MODIS Zarr v2 | {len(fechas)} fechas | {len(tifs)} TIFFs | {len(bandas)} bandas')
+    log.info(f'MODIS Zarr v3 | {len(fechas)} fechas | {len(tifs)} TIFFs raw | {len(bandas)} bandas')
     log.info(f'destino: gs://{BUCKET}/{ZARR_PREFIX}/')
-    log.info(f'FIX aplicado: mask(!= {MODIS_FILL}) antes de promediar + scale {MODIS_SCALE} en {sorted(BANDAS_FISICAS)}')
+    log.info(f'FIX aplicado: tile {TILE_MODIS_CALI} + mask(!= {MODIS_FILL}) antes de promediar + scale {MODIS_SCALE} en {sorted(BANDAS_FISICAS)}')
 
     primera_fecha = fechas[0]
     primer_tif = blob_names_por_fecha[primera_fecha][0]

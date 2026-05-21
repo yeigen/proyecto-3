@@ -18,7 +18,7 @@ Cronología y estado del trabajo. Se actualiza con cada hito.
 
 ### Hito 1 — Inventario y verificación del panel (Situación 1)
 
-- ✓ 6 paneles Zarr publicados en Kaggle Dataset [`juanjoseorozcolopez/geovision-fuentes`](https://www.kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes) (83.6 GiB, 8,848 archivos).
+- ✓ 6 paneles Zarr publicados en Kaggle Dataset [`juanjoseorozcolopez/geovision-fuentes`](https://www.kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes) (89.73 GB, 8,848 archivos en Kaggle; 8,847 archivos de datos en manifest).
 - ✓ Shapes verificadas vía API: `S2 (1552,13,3897,3897)`, `S5P (~25K,n,36,36)`, `ERA5 (43824,8,2,2)`, `MODIS (1826,4,43,43)`.
 - ✓ DAGMA: 107,291 filas, 10 estaciones (9 DAGMA + 1 CVC Yumbo).
 - ✓ Cobertura temporal panel: 2021-01-03 a 2025-12-31 (5 años exactos).

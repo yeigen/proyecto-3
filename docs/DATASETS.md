@@ -4,7 +4,7 @@ Las 6 fuentes satelitales/atmosféricas que integran el panel longitudinal 2021�
 
 ## Almacenamiento del panel
 
-- **Kaggle Dataset** (consumo principal, T4 GPU): [`juanjoseorozcolopez/geovision-fuentes`](https://www.kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes) — 8,848 archivos · 83.6 GiB · publicado 2026-05-14. Contiene los 6 `panel.zarr/` + DAGMA in-situ. Es la fuente que el equipo usa para Situación 2 y 3.
+- **Kaggle Dataset** (consumo principal, T4 GPU): [`juanjoseorozcolopez/geovision-fuentes`](https://www.kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes) — 89.73 GB · 8,848 archivos en Kaggle. El manifest técnico registra 8,847 archivos de datos; la diferencia es `dataset-metadata.json`. Contiene los 6 `panel.zarr/` + DAGMA in-situ. Es la fuente que el equipo usa para Situación 2 y 3.
 - **GCS** ([`gs://fuentes-proyecto-3`](https://console.cloud.google.com/storage/browser/fuentes-proyecto-3)): GeoTIFFs raw (source-of-truth) + `panel.zarr/` de Sentinel-2. Fuente upstream del Kaggle Dataset.
 - **HuggingFace** ([`yeigen/fuentes-proyecto-3`](https://huggingface.co/buckets/yeigen/fuentes-proyecto-3)): `panel.zarr/` de las 5 fuentes pequeñas. Backup público.
 - **BBox**: `[-76.65, 3.30, -76.30, 3.65]` (Cali + Yumbo + Acopi, ~38 × 38 km).
@@ -49,7 +49,7 @@ Shapes leídos directamente de cada `panel.zarr/.zmetadata` con la API de Kaggle
 
 - **MODIS está pre-agrupado por día**: 151,558 gránulos brutos colapsados a 1,826 días (5 años × 365.2) con promedio sobre swaths válidos.
 - **S5P NO₂ tiene 3 bandas** (`tropospheric_NO2_column_number_density`, `NO2_column_number_density`, `cloud_fraction`); SO₂/O₃ tienen 2 cada uno (columna principal + `cloud_fraction`).
-- Total Kaggle: **8,848 archivos · 83.6 GiB**.
+- Total Kaggle: **89.73 GB · 8,848 archivos en la UI**. Manifest técnico: **89.732 GB · 8,847 archivos de datos**.
 
 ### DAGMA / SISAIRE ground truth (carpeta `dagma/` del Kaggle Dataset)
 
