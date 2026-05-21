@@ -323,9 +323,9 @@ Mi lectura: Situación 1 cumple su objetivo. No resuelve todavía el modelado, p
 
 ## 14. Archivos relacionados
 
-- `docs/situacion-1/SIT1_PANEL.md`: resumen técnico de Situación 1.
-- `docs/DATASETS.md`: catálogo de fuentes, bandas incluidas y bandas excluidas.
-- `docs/JUSTIFICACIONES.md`: decisiones técnicas del proyecto.
-- `docs/EDA_HALLAZGOS.md`: hallazgos exploratorios.
-- `manifest/manifest_output/manifest.json`: manifest técnico del dataset.
-- `google-earth/config.py`: BBox, fuentes y bandas útiles.
+- [`SIT1_PANEL.md`](SIT1_PANEL.md): resumen técnico de Situación 1.
+- [`DATASETS.md`](../DATASETS.md): catálogo de fuentes, bandas incluidas y bandas excluidas.
+- [`JUSTIFICACIONES.md`](../JUSTIFICACIONES.md): decisiones técnicas del proyecto.
+- [`EDA_HALLAZGOS.md`](../EDA_HALLAZGOS.md): hallazgos exploratorios.
+- [`manifest.json`](../../manifest/manifest_output/manifest.json): manifest técnico del dataset.
+- [`config.py`](../../google-earth/config.py): BBox, fuentes y bandas útiles.
