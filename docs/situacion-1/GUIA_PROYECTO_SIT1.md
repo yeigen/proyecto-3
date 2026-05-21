@@ -221,6 +221,14 @@ MODIS MAIAC aporta AOD, una señal relacionada con aerosoles. Es útil como prox
 | `Column_WV` | WV | Columna de vapor de agua | escala 0.001 | Humedad atmosférica integrada |
 | `AOD_QA` | QA | Calidad de AOD | bitfield | Máscara de calidad del producto MAIAC |
 
+### Por qué se usa el tile MODIS `h10v08`
+
+`h10v08` no es una variable de contaminación ni una capa especial de Cali. Es el identificador de un tile dentro de la grilla global MODIS: `h` indica la posición horizontal y `v` la posición vertical.
+
+Sabemos que Cali cae en `h10v08` porque ese tile es el que intersecta el BBox operativo del proyecto (`[-76.65, 3.30, -76.30, 3.65]`) y conserva la señal física sobre Cali/Yumbo. En las primeras versiones se estaban mezclando gránulos MODIS que pasaban por el proceso, pero no representaban bien el área útil. Eso diluía el promedio diario y dejaba AOD demasiado bajo o inválido.
+
+La corrección final filtra `h10v08`, enmascara `_FillValue=-28672` y aplica la escala `0.001`. Con eso el panel MODIS pasa a rangos físicos.
+
 La fuente tuvo un problema técnico importante. Se detectó y corrigió en tres iteraciones:
 
 | Versión | Problema | Resultado |
