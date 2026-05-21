@@ -2,13 +2,13 @@
 
 ## Decisión
 
-Para NO2, SO2 y O3, el ground truth principal será el parquet SISAIRE/DAGMA-CVC:
+Para NO2, SO2 y O3, la verdad observada principal será el parquet SISAIRE/DAGMA-CVC:
 
 - `dagma/dagma_cvc_horario_raw.parquet`
 - `dagma/estaciones_metadata.csv`
 - `dagma/manifest_ground_truth.json`
 
-El Excel de Cristian (`dagma/dagma-cristian.xlsx`) y los CSV derivados se conservan como fuentes complementarias. No se mezclan con el parquet como ground truth principal porque no son estadísticamente equivalentes.
+El Excel de Cristian (`dagma/dagma-cristian.xlsx`) y los CSV derivados se conservan como fuentes complementarias. No se mezclan con el parquet como verdad observada principal porque no son estadísticamente equivalentes.
 
 ## 1. Fuente canónica: parquet SISAIRE/DAGMA-CVC
 
@@ -18,7 +18,7 @@ El parquet tiene un esquema normalizado: fecha, estación, contaminante, valor, 
 
 ![Carga del parquet principal](../evidencias/situacion-3/dagma/sit3_dagma_parquet_carga_principal.png)
 
-Criterios para usarlo como ground truth:
+Criterios para usarlo como verdad observada:
 
 - Rango controlado: 2020-01-01 a 2024-12-31.
 - 10 estaciones, incluyendo Yumbo CVC.
@@ -40,7 +40,7 @@ Diferencias principales:
 | Estaciones | 10, incluye Yumbo CVC | 9 DAGMA |
 | Variables | NO2, SO2, O3 | NO2, SO2, O3, PM, H2S, meteorología |
 | Formato | Largo, normalizado | Ancho, encabezados multinivel |
-| Uso recomendado | Ground truth principal | Fuente auxiliar |
+| Uso recomendado | Verdad observada principal | Fuente auxiliar |
 
 El Excel no se descarta. Se usa como apoyo para variables que el parquet no tiene, pero no reemplaza la fuente canónica de NO2/SO2/O3.
 
@@ -77,11 +77,11 @@ En este cruce, O3 tiene r=0.387 y SO2 r=0.091. O3 apenas muestra relación baja/
 
 La diferencia media resume el error promedio entre fuentes. La mediana muestra el error típico sin quedar tan afectada por valores extremos.
 
-Para O3, la diferencia media es 20.88 ug/m3 y la mediana 9.38 ug/m3. Para SO2, la diferencia media es 7.45 ug/m3 y la mediana 3.09 ug/m3. Son diferencias demasiado grandes para tratar ambos archivos como si fueran el mismo ground truth.
+Para O3, la diferencia media es 20.88 ug/m3 y la mediana 9.38 ug/m3. Para SO2, la diferencia media es 7.45 ug/m3 y la mediana 3.09 ug/m3. Son diferencias demasiado grandes para tratar ambos archivos como si fueran la misma verdad observada.
 
 Conclusión estadística: Excel y parquet no son intercambiables para NO2/SO2/O3 sin una auditoría adicional de unidades, calibración, agregación temporal y fuente.
 
-## 5. Caso NO2: por qué el combinado no será ground truth principal
+## 5. Caso NO2: por qué el combinado no será verdad observada principal
 
 El parquet tiene NO2 solo en Yumbo. El Excel tiene NO2 en Univalle. Combinarlos aumenta el número de mediciones, pero mezcla dos cosas al mismo tiempo: estación y fuente.
 
@@ -95,7 +95,7 @@ El parquet tiene NO2 solo en Yumbo. El Excel tiene NO2 en Univalle. Combinarlos 
 
 Esto genera confusión estadística: si el modelo ve diferencias entre Yumbo y Univalle, no sabemos si vienen de diferencias espaciales reales o de diferencias entre fuentes.
 
-Por eso `csv/dagma/no2_combinado_yumbo_univalle.csv` puede usarse como experimento separado, siempre marcando la fuente. No debe mezclarse silenciosamente con el ground truth principal.
+Por eso `csv/dagma/no2_combinado_yumbo_univalle.csv` puede usarse como experimento separado, siempre marcando la fuente. No debe mezclarse silenciosamente con la verdad observada principal.
 
 ## 6. Soporte EDA DAGMA
 
@@ -135,7 +135,7 @@ DAGMA tiene datos en 2020, pero el panel satelital útil comienza en 2021. Por e
 
 | Fuente | Uso recomendado | Motivo |
 |---|---|---|
-| `dagma/dagma_cvc_horario_raw.parquet` | Ground truth principal para NO2, SO2 y O3 | Tiene manifest, esquema normalizado y trazabilidad. |
+| `dagma/dagma_cvc_horario_raw.parquet` | Verdad observada principal para NO2, SO2 y O3 | Tiene manifest, esquema normalizado y trazabilidad. |
 | `dagma/dagma-cristian.xlsx` | Fuente complementaria | Aporta PM10, PM25, H2S y meteorología, pero no coincide bien con parquet para O3/SO2. |
 | `csv/dagma/dagma_excel_limpio.csv` | Análisis auxiliar | Es el Excel procesado a formato largo. |
 | `csv/dagma/cruce_parquet_excel.csv` | Evidencia de comparación | Contiene registros coincidentes y diferencias entre fuentes. |
@@ -145,6 +145,6 @@ DAGMA tiene datos en 2020, pero el panel satelital útil comienza en 2021. Por e
 
 No se descarta el Excel de Cristian. Se conserva como fuente complementaria.
 
-La decisión es no usarlo como ground truth principal para NO2, SO2 y O3 porque el cruce con el parquet muestra baja concordancia estadística. Para NO2, además, el combinado Yumbo-Univalle mezcla fuente y estación, lo que impide separar si las diferencias vienen del territorio o del origen del dato.
+La decisión es no usarlo como verdad observada principal para NO2, SO2 y O3 porque el cruce con el parquet muestra baja concordancia estadística. Para NO2, además, el combinado Yumbo-Univalle mezcla fuente y estación, lo que impide separar si las diferencias vienen del territorio o del origen del dato.
 
 La validación principal de Sit 3 debe usar el parquet SISAIRE/DAGMA-CVC. El Excel puede apoyar análisis auxiliares de PM, meteorología y experimentos separados, siempre marcando la fuente de cada medición.

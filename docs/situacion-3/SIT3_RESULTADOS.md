@@ -9,7 +9,7 @@ Se evaluaron embeddings del modelo CLIP (Sit 2), ConvLSTM y Kriging Ordinario. E
 
 - **Periodo util:** 2021-2024 (4 anos de overlap panel satelital + DAGMA)
 - **Mediciones DAGMA:** 55,099 en periodo util
-- **Criterio ground truth:** [`DAGMA_JUSTIFICACION_CRUCE_CRISTIAN.md`](DAGMA_JUSTIFICACION_CRUCE_CRISTIAN.md)
+- **Criterio de verdad observada:** [`DAGMA_JUSTIFICACION_CRUCE_CRISTIAN.md`](DAGMA_JUSTIFICACION_CRUCE_CRISTIAN.md)
 - **Tiles disponibles:** 77 fechas unicas
 - **Secuencias ConvLSTM potenciales:** 2,839
 
