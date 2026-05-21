@@ -266,6 +266,20 @@ dagma/dagma_cvc_horario_raw.parquet
 
 Contiene 107,291 registros horarios entre 2020-01-01 y 2024-12-31. El cruce útil con el panel satelital es 2021-2024.
 
+Para cumplir la lectura pedida en la Situación 1, también dejamos la serie mensual media de contaminantes. Esta gráfica resume la evolución temporal observada por DAGMA/CVC.
+
+| Contaminante | Meses | Mediciones | Estaciones promedio | Media mensual | Min mensual | Max mensual |
+|---|---:|---:|---:|---:|---:|---:|
+| NO2 | 15 | 6,246 | 1.00 | 10.71 | 2.98 | 25.50 |
+| O3 | 52 | 60,098 | 3.40 | 16.54 | 0.76 | 52.16 |
+| SO2 | 49 | 40,947 | 2.12 | 8.75 | 1.27 | 34.04 |
+
+![Serie temporal mensual media por contaminante DAGMA/CVC](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
+
+La segunda figura muestra la misma agregación mensual, separada por estación. Ahí se ve con claridad que NO2 solo aparece en ESTACIÓN YUMBO dentro del parquet principal.
+
+![Serie temporal mensual media por estación DAGMA/CVC](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
+
 Hay 10 estaciones dentro del BBox:
 
 | Estación | Operador | Rol |

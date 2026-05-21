@@ -240,6 +240,20 @@ O3 se mide en 8 estaciones (todas excepto Canaveralejo y Ermita).
 
 La cobertura disminuye drasticamente a partir de 2021. Yumbo CVC es la unica estacion con datos consistentes en todo el periodo.
 
+**Serie temporal mensual media por contaminante:**
+
+| Contaminante | Meses | Mediciones | Estaciones promedio | Media mensual | Min mensual | Max mensual |
+|---|---:|---:|---:|---:|---:|---:|
+| NO2 | 15 | 6,246 | 1.00 | 10.71 | 2.98 | 25.50 |
+| O3 | 52 | 60,098 | 3.40 | 16.54 | 0.76 | 52.16 |
+| SO2 | 49 | 40,947 | 2.12 | 8.75 | 1.27 | 34.04 |
+
+![DAGMA serie temporal media por contaminante](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
+
+Serie temporal mensual por estacion y contaminante:
+
+![DAGMA serie temporal media por estacion](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
+
 Cobertura temporal por estacion:
 
 ![DAGMA cobertura temporal](/docs/evidencias/situacion-3/dagma/figuras/dagma_cobertura_temporal.png)
@@ -273,7 +287,7 @@ con datos del sistema SVCASC que incluye variables no presentes en el parquet:
 | O3 | 20,449 | **0.387** | 20.88 ug/m3 |
 | SO2 | 14,735 | **0.091** | 7.45 ug/m3 |
 
-**Conclusion:** Las fuentes NO son consistentes para NO2/SO2/O3. El parquet (SISAIRE) se mantiene como ground truth oficial. El Excel se usa como fuente complementaria para PM2.5/PM10 y meteorologia.
+**Conclusion:** Las fuentes NO son consistentes para NO2/SO2/O3. El parquet (SISAIRE) se mantiene como verdad observada oficial. El Excel se usa como fuente complementaria para PM2.5/PM10 y meteorologia.
 
 ## Lossless verification
 
