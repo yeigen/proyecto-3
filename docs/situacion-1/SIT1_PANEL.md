@@ -2,7 +2,9 @@
 
 ## Resumen
 
-Panel analitico longitudinal multi-fuente sobre el area metropolitana de Santiago de Cali
+Para una explicación narrativa del objetivo del proyecto y del alcance de esta fase, ver [`GUIA_PROYECTO_SIT1.md`](GUIA_PROYECTO_SIT1.md).
+
+Panel analítico longitudinal multi-fuente sobre el área metropolitana de Santiago de Cali
 incluyendo el corredor industrial Yumbo-Acopi. Periodo 2021-2026, ~90 GB en formato Zarr,
 almacenado en Google Cloud Storage, HuggingFace Hub y Kaggle Datasets.
 
