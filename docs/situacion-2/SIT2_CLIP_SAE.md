@@ -95,8 +95,9 @@ lo que explica por que el CLIP los confunde. El modelo solo puede distinguirlos 
 
 ozono_anomalo tiene un marcado sesgo estacional (86% de los tiles en 2022+2024, todos en meses secos).
 Esto es fisicamente correcto: el ozono troposferico es episodico y se concentra en la temporada
-seca de Cali (Fishman et al. 2010). Para la defensa, documentar que el split estratificado
-por ano mitiga este sesgo en la evaluacion.
+seca de Cali (Fishman et al. 2010). La auditoría posterior encontró que el CLIP v3 usa
+split aleatorio global, no split estratificado por año. Por eso las métricas deben leerse
+como separabilidad bajo distribución mezclada, no como generalización temporal estricta.
 
 ### Cobertura MODIS
 
@@ -122,6 +123,17 @@ Cada pseudo-label solo existe para su clase correspondiente:
 | no2 | contaminacion_alta_NO2 | 7.40e-05 | 6.80e-05 | 1.00e-04 |
 | so2 | contaminacion_alta_SO2 | 5.92e-04 | 5.26e-04 | 8.29e-04 |
 | o3 | ozono_anomalo | 0.1267 | 0.1268 | 0.1292 |
+
+## Auditoría metodológica
+
+La revisión de sesgos Sit 1 → Sit 2 está documentada en [`AUDITORIA_SESGOS_SIT1_SIT2.md`](AUDITORIA_SESGOS_SIT1_SIT2.md).
+
+Hallazgos principales:
+
+- MODIS final en `tiles_meta.parquet` tiene rangos físicos, aunque GCS conserva versiones anteriores rotas.
+- El split de CLIP v3 es aleatorio global y tiene leakage temporal/espacial suave.
+- `ozono_anomalo` usa O3 de columna total con alta nubosidad en hot pixels.
+- Sentinel-2 fue llevado a grilla 10 m con upsampling nearest-neighbor para bandas de 20 m y 60 m.
 
 ## Arquitectura del modelo
 
@@ -224,6 +236,7 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 
 | Notebook | Contenido |
 |---|---|
-| `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb` | Re-entreno final (33 celdas) |
-| `notebooks/sit2/04_sae_afe_afc.ipynb` | SAE + AFE + AFC (27 celdas) |
-| `notebooks/eda/tiles_exploracion.ipynb` | Exploracion de tiles (22 celdas) |
+| `notebooks/sit2/01_clip_v1_oficial.ipynb` | Entrenamiento CLIP v1, diagnóstico de overfitting |
+| `notebooks/sit2/02_tiles_oficial.ipynb` | Exploración de tiles |
+| `notebooks/sit2/03_clip_v3_oficial.ipynb` | Re-entreno final sin S5P |
+| `notebooks/sit2/04_sae_oficial.ipynb` | SAE + AFE + AFC |

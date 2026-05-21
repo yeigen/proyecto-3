@@ -1,8 +1,7 @@
 # Sit 2 — Entrenamiento CLIP fine-tune (Stage 1)
 
 Documento de resultados, problemas detectados y decisiones tomadas durante el fine-tune
-del notebook `scripts/sit2/situacion-2-clip-modificado.ipynb` (versión modificada de
-`01_clip_finetune.py`).
+del notebook `notebooks/sit2/01_clip_v1_oficial.ipynb`.
 
 ## Configuración real ejecutada
 
@@ -14,14 +13,14 @@ del notebook `scripts/sit2/situacion-2-clip-modificado.ipynb` (versión modifica
 | Normalización | `(x - BAND_MEAN) / BAND_STD` por banda, clip ±3σ | computada sobre los 5K tiles |
 | Split val | 6% estratificado (300 tiles, 60/clase) | reducido vs 10% inicial |
 | Batch | 64 | InfoNCE bidireccional |
-| Epochs | 30 | de 50 originales |
+| Epochs | 10 | primera corrida oficial |
 | LR (param groups) | visual_6-9: 2e-5, visual_10-11: 5e-5, text_6-11: 5e-5, proj: 1e-4, logit_scale: 1e-3 | layer-wise decay |
 | Params entrenables | 62.1M / 158.4M (39.2%) | bloques 0-5 congelados |
 | Weight decay | 0.2 | |
 | Warmup | 2 epochs | |
 | Scheduler | cosine | |
 | Hardware | Tesla T4 (14.6 GB) | |
-| Tiempo total | **43.1 min** | mucho menos que estimación 4-5h |
+| Tiempo total | **13.3 min** | corrida oficial v1 |
 
 ## Curvas de entrenamiento
 
@@ -29,19 +28,18 @@ Imagen: `docs/evidencias/situacion-2/entrenamiento/sit2_entrenamiento_curvas_apr
 
 | Epoch | Train Loss | Val Loss | R@1 | R@5 | R@10 |
 |---|---|---|---|---|---|
-| 1 | 3.48 | 3.82 | 0.020 | 0.083 | 0.147 |
-| **4** | **2.95** | **3.93** | **0.040** | **0.117** ← mejor | **0.210** |
-| 10 | 0.71 | 5.39 | 0.023 | 0.100 | 0.157 |
-| 20 | 0.38 | 6.38 | 0.013 | 0.070 | 0.150 |
-| 30 | 0.35 | 6.58 | 0.023 | 0.080 | 0.147 |
+| 1 | 3.7752 | 3.8833 | 0.013 | 0.057 | 0.117 |
+| 4 | 3.1194 | 3.7988 | 0.020 | 0.117 | 0.170 |
+| **7** | **1.9451** | **4.6191** | **0.023** | **0.130** ← mejor | **0.197** |
+| 10 | 0.9546 | 4.8808 | 0.027 | 0.117 | 0.183 |
 
 ## Diagnóstico crítico
 
 ### 1. Overfitting severo (después de epoch 4)
 
-- Train loss: **3.48 → 0.35** (cae 10×).
-- Val loss: **3.82 → 6.58** (sube 73%).
-- Gap train-val crece monotónicamente desde epoch 5.
+- Train loss: **3.7752 → 0.9546**.
+- Val loss: **3.8833 → 4.8808**.
+- Gap train-val crece desde la mitad del entrenamiento.
 
 **Causas técnicas:**
 
@@ -63,21 +61,21 @@ genera **1000 tiles por clase con el mismo template** y solo cambio en el valor 
 Los embeddings textuales son casi idénticos dentro de clase. El modelo puede confundir
 `tile_i` con `texto_j` de la misma clase, y eso **no es error real** pero R@K lo cuenta como error.
 
-Por eso R@1=0.04 (4%) parece pésimo, pero **chance level con 300 textos casi-duplicados
+Por eso R@1=0.023 parece pésimo, pero **chance level con 300 textos casi-duplicados
 agrupados en 5 clases NO es 1/300 sino más alto**. El recall@K subestima drásticamente
 la calidad real del embedding aprendido.
 
-**Conclusión:** R@5=0.117 vs random teórico 5/300=0.017 → mejora 7×. El modelo **sí
+**Conclusión:** R@5=0.130 vs random teórico 5/300=0.017 → mejora 7.6×. El modelo **sí
 aprendió estructura**, pero la métrica no es la apropiada.
 
-### 3. El mejor checkpoint es de epoch 4
+### 3. El mejor checkpoint v1 es de epoch 7
 
-`clip_finetuned_best.pt` corresponde a epoch 4 con R@5=0.117. Es el que vamos a usar.
-Después de epoch 4 el modelo memoriza pares train específicos sin generalizar.
+`clip_finetuned_best.pt` de la corrida v1 corresponde a epoch 7 con R@5=0.130. Esa corrida se usa como diagnóstico inicial, no como modelo final.
+Después de las primeras epochs el modelo empieza a memorizar pares train específicos sin generalizar bien.
 
 ## Acción correctiva inmediata: re-evaluación con métricas adecuadas
 
-Nuevo notebook: `scripts/sit2/01b_eval_classification.py`.
+Evaluación incluida en `notebooks/sit2/01_clip_v1_oficial.ipynb`.
 
 Métricas que reporta sobre el `clip_finetuned_best.pt`:
 
@@ -118,10 +116,10 @@ podemos pasar a Stage 2 (SAE) sobre el checkpoint actual.
 ## Actualizacion v2 — Re-entreno con LoRA + Late Fusion (sin S5P)
 
 ### Problema detectado
-El entrenamiento original (v1) tenia overfitting severo (R@5=0.117) y data leakage por pasar valores S5P como input al fusion MLP. Penalizacion potencial: -25% del proyecto.
+El entrenamiento original (v1) tenia overfitting severo (mejor R@5=0.130) y data leakage por pasar valores S5P como input al fusion MLP. Penalizacion potencial: -25% del proyecto.
 
 ### Solucion aplicada
-Nuevo notebook: `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb`.
+Nuevo notebook: `notebooks/sit2/03_clip_v3_oficial.ipynb`.
 
 | Cambio | v1 (original) | v2 (corregido) |
 |---|---|---|
@@ -136,11 +134,11 @@ Nuevo notebook: `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb`.
 
 | Metrica | v1 (overfit) | v2 (LoRA, sin S5P) | KPI minimo |
 |---|---|---|---|
-| R@1 | 0.040 | **0.483** | >= 0.45 |
-| R@5 | 0.117 | **1.000** | >= 0.70 |
-| Zero-shot accuracy | 0.407 (artificial) | **0.483** (genuino) | -- |
+| R@1 | 0.023 | **0.483** | >= 0.45 |
+| R@5 | 0.130 | **1.000** | >= 0.70 |
+| Zero-shot accuracy | 0.407 | **0.500** (genuino, solo visual) | -- |
 | k-NN accuracy | -- | **0.430** | -- |
-| Overfitting | Severo (val +73%) | **No** (train=3.28, val=3.41) | -- |
+| Overfitting | Severo | **No** (train=3.28, val=3.41) | -- |
 | Data leakage | Si (S5P input) | **No** | Sin penalizacion |
 
 ### Data leakage diagnostic
@@ -195,10 +193,10 @@ Modelo con 4 constructos latentes (Carga Antropogenica, Estres Vegetal, Densidad
 
 | Indice | Resultado | Meta | Estatus |
 |---|---|---|---|
-| CFI | **0.800** | > 0.90 | No alcanzado |
-| RMSEA | **0.000** | < 0.08 | SUPERADO |
+| CFI | **0.933** | > 0.90 | SUPERADO |
+| RMSEA | **0.109** | < 0.08 | Ligeramente sobre la meta |
 
-El CFI por debajo del umbral sugiere que el modelo con 4 constructos y 6 indicadores es insuficiente para capturar la estructura completa de los embeddings. El RMSEA perfecto indica que no hay error de aproximacion.
+El CFI supera el umbral. El RMSEA queda ligeramente por encima de 0.08; con N=5,000, el chi-cuadrado se vuelve sensible y puede inflar este indicador.
 
 ### Checkpoint
 
@@ -211,14 +209,15 @@ Subido a Kaggle Dataset: `edwardsx/geovision-clip-modelo-v2` (611 MB).
 
 | Notebook | Contenido |
 |---|---|
-| `notebooks/sit2/03_reentreno_clip_lora.ipynb` | Re-entreno con S5P (data leakage, descartado) |
-| `notebooks/sit2/03_reentreno_clip_lora_v2_sin_s5p.ipynb` | Re-entreno sin S5P (version final, 33 celdas) |
-| `notebooks/sit2/04_sae_afe_afc.ipynb` | SAE + AFE + AFC (21 celdas) |
+| `notebooks/sit2/01_clip_v1_oficial.ipynb` | Entrenamiento CLIP v1, diagnóstico de overfitting |
+| `notebooks/sit2/02_tiles_oficial.ipynb` | Exploración de tiles |
+| `notebooks/sit2/03_clip_v3_oficial.ipynb` | Re-entreno final sin S5P |
+| `notebooks/sit2/04_sae_oficial.ipynb` | SAE + AFE + AFC |
 
 ## Referencias
 
 - Curvas: `docs/evidencias/situacion-2/entrenamiento/sit2_entrenamiento_curvas_aprendizaje.png`
-- Notebook efectivo: `scripts/sit2/situacion-2-clip-modificado.ipynb`
-- Notebook fuente: `scripts/sit2/01_clip_finetune.py`
-- Eval correcta: `scripts/sit2/01b_eval_classification.py`
+- Notebook v1 oficial: `notebooks/sit2/01_clip_v1_oficial.ipynb`
+- Notebook CLIP final: `notebooks/sit2/03_clip_v3_oficial.ipynb`
+- Notebook SAE/AFE/AFC: `notebooks/sit2/04_sae_oficial.ipynb`
 - Conceptos: `docs/conceptos/clip-y-remoteclip.md`
