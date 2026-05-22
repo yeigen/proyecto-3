@@ -105,7 +105,7 @@ Sobre 150 escenas evaluadas (subsample SCL 1/10):
 | Cobertura mínima top-12 | 36% |
 | Tiles MGRS en top-12 | **T18NUJ** (dominio total observado) |
 
-Imagen: `docs/evidencias/situacion-1/eda/sentinel-2/s2_rgb_top12.png`. Visualmente: nubes blancas + vegetación verde + manchas urbanas grises — consistente con Cali tropical.
+Imagen: `docs/situacion-1/evidencias/eda/sentinel-2/s2_rgb_top12.png`. Visualmente: nubes blancas + vegetación verde + manchas urbanas grises — consistente con Cali tropical.
 
 ### Bugs encontrados y resueltos en este bloque
 
@@ -631,7 +631,7 @@ La asimetría AOD vs WV es inherente al algoritmo MAIAC v6.1:
 
 ### Imágenes generadas
 
-Carpeta: `docs/evidencias/situacion-1/eda/modis/v2/`
+Carpeta: `docs/situacion-1/evidencias/eda/modis/v2/`
 
 - `modis_distribucion_temporal.png` — histograma de escenas/mes; confirma cobertura uniforme 30 escenas/mes × 60 meses = 1,826 escenas (5 años exactos diarios, incluye 2024 bisiesto).
 - `modis_raw_vs_escalado.png` — histogramas RAW (panel v3 ya físico) y "escalado" (idéntico, sin doble multiplicación); confirma valores físicos plausibles.
@@ -1063,7 +1063,7 @@ Centroides observados en PC1-PC2-PC3:
 
 ### Re-corrido del PCA post-fix MODIS v3 — outliers patológicos eliminados
 
-Imagen: `docs/evidencias/situacion-1/eda/cruce/v2/cruzado_pca_biplot.png`
+Imagen: `docs/situacion-1/evidencias/eda/cruce/v2/cruzado_pca_biplot.png`
 
 El PCA original (n=5,000) mostraba un cluster anómalo extremo en `PC1 ∈ [−15, −10]` con muy pocos puntos. Tras el fix MODIS v3 (filtro `h10v08` + scale correcto), se re-ejecutó el PCA **solo sobre los tiles con AOD válido** (`n = 767` de 5,000):
 

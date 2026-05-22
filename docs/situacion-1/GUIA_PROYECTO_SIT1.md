@@ -1,5 +1,7 @@
 # Guía del proyecto y Situación 1
 
+> Versión reorganizada: ver [índice de Situación 1](README.md).
+
 Este documento explica qué quiere lograr GeoVision-CLIP Cali y ordena la lectura de la Situación 1. La Situación 2 y la Situación 3 se documentan aparte para no mezclar objetivos.
 
 ## 1. Qué busca el proyecto
@@ -30,11 +32,11 @@ El PDF original pedía un recorte más pequeño. El proyecto usa este BBox opera
 
 Ese recorte cubre Cali, Yumbo, Acopi y zonas agrícolas cercanas. También incluye la estación de Yumbo, que es crítica porque es la única estación con NO2 en la verdad observada principal.
 
-![Comparación entre BBox del PDF y BBox usado por el proyecto](/docs/evidencias/situacion-1/panel/sit1_panel_bbox_pdf_vs_proyecto.png)
+![Comparación entre BBox del PDF y BBox usado por el proyecto](evidencias/panel/sit1_panel_bbox_pdf_vs_proyecto.png)
 
 Vista general del área:
 
-![Vista satelital de Cali y el área de estudio](/docs/evidencias/situacion-1/panel/sit1_panel_cali_google_earth.png)
+![Vista satelital de Cali y el área de estudio](evidencias/panel/sit1_panel_cali_google_earth.png)
 
 ## 3. Qué es la Situación 1
 
@@ -52,7 +54,7 @@ En términos prácticos, Situación 1 entrega:
 
 El resultado operativo es el Kaggle Dataset `juanjoseorozcolopez/geovision-fuentes`, que pesa 89.73 GB. Kaggle muestra 8,848 archivos; el manifest técnico registra 8,847 archivos de datos porque Kaggle cuenta además `dataset-metadata.json`.
 
-![Dataset del panel en Kaggle](/docs/evidencias/situacion-1/panel/sit1_panel_kaggle_dataset.png)
+![Dataset del panel en Kaggle](evidencias/panel/sit1_panel_kaggle_dataset.png)
 
 ## 4. Flujo de datos
 
@@ -72,9 +74,9 @@ Consumo por notebooks de Sit 2 y Sit 3
 
 GCS queda como almacenamiento upstream. Kaggle es la fuente práctica para el equipo porque funciona bien con notebooks y GPU T4. HuggingFace se usa como respaldo público para paneles pequeños.
 
-![Bucket en Google Cloud Storage](/docs/evidencias/situacion-1/panel/sit1_panel_bucket_gcs.png)
+![Bucket en Google Cloud Storage](evidencias/panel/sit1_panel_bucket_gcs.png)
 
-![Bucket público en HuggingFace](/docs/evidencias/situacion-1/panel/sit1_panel_bucket_hugging_face.png)
+![Bucket público en HuggingFace](evidencias/panel/sit1_panel_bucket_hugging_face.png)
 
 ## 5. Resumen del panel
 
@@ -101,7 +103,7 @@ Sentinel-2 organiza sus escenas con una grilla MGRS. En nuestro BBox aparecen do
 
 La diferencia no se explica principalmente por nubosidad. El punto es geométrico: el BBox del proyecto llega hasta 3.65°N y `T18NUK` empieza cerca del borde norte. Por eso el panel útil de Sentinel-2 queda dominado por `T18NUJ`.
 
-![Estaciones DAGMA/CVC frente a tiles MGRS](/docs/evidencias/situacion-3/dagma/figuras/dagma_estaciones_vs_tile_mgrs.png)
+![Estaciones DAGMA/CVC frente a tiles MGRS](../situacion-3/evidencias/dagma/figuras/dagma_estaciones_vs_tile_mgrs.png)
 
 Esta figura también ayuda a leer la validación posterior: las 10 estaciones DAGMA/CVC caen en `T18NUJ`. No tenemos una foto separada de cada tile porque el proyecto no la necesitó; la evidencia útil es la relación entre BBox, estaciones y grilla MGRS.
 
@@ -131,7 +133,7 @@ Las bandas tienen resoluciones nativas distintas: 10 m, 20 m y 60 m. Para el pan
 
 Ejemplo visual de Sentinel-2:
 
-![Escena RGB Sentinel-2](/docs/evidencias/situacion-1/eda/sentinel-2/s2_rgb_escena_138.png)
+![Escena RGB Sentinel-2](evidencias/eda/sentinel-2/s2_rgb_escena_138.png)
 
 Hallazgos principales:
 
@@ -141,9 +143,9 @@ Hallazgos principales:
 - La distribución NDVI es bimodal: urbano cerca de 0.15 y vegetación cerca de 0.75.
 - Solo 2 tiles MGRS cruzan el BBox; T18NUJ domina casi todo el panel útil.
 
-![Distribución temporal Sentinel-2](/docs/evidencias/situacion-1/eda/sit1_eda_s2_distribucion_temporal_captura.png)
+![Distribución temporal Sentinel-2](evidencias/eda/sit1_eda_s2_distribucion_temporal_captura.png)
 
-![Distribución NDVI Sentinel-2](/docs/evidencias/situacion-1/eda/sentinel-2/s2_ndvi_distribucion.png)
+![Distribución NDVI Sentinel-2](evidencias/eda/sentinel-2/s2_ndvi_distribucion.png)
 
 ## 8. Sentinel-5P: contaminantes satelitales
 
@@ -177,7 +179,7 @@ O3 se maneja con más cuidado. Sentinel-5P entrega columna total de ozono, no oz
 
 Mapas promedio de S5P:
 
-![Mapas promedio Sentinel-5P](/docs/evidencias/situacion-1/eda/s5p/s5p_mapas_promedio.png)
+![Mapas promedio Sentinel-5P](evidencias/eda/s5p/s5p_mapas_promedio.png)
 
 Percentiles usados como referencia en el panel:
 
@@ -206,7 +208,7 @@ Se usan 8 variables:
 
 La variable más importante para dispersión es `boundary_layer_height` o BLH. En Cali varía mucho durante el día: cerca de 66 m en la mañana y cerca de 607 m al mediodía. Esa diferencia cambia la dilución de contaminantes.
 
-![Ciclo diurno de ERA5](/docs/evidencias/situacion-1/eda/era5/era5_ciclo_diurno.png)
+![Ciclo diurno de ERA5](evidencias/eda/era5/era5_ciclo_diurno.png)
 
 También se observó viento medio desde el norte, coherente con transporte desde Yumbo hacia Cali. Esto respalda la decisión de ampliar el BBox.
 
@@ -239,7 +241,7 @@ La fuente tuvo un problema técnico importante. Se detectó y corrigió en tres 
 
 La versión final confiable es `panel_v3.zarr`.
 
-![Mapa promedio MODIS corregido](/docs/evidencias/situacion-1/eda/modis/v2/modis_mapa_promedio.png)
+![Mapa promedio MODIS corregido](evidencias/eda/modis/v2/modis_mapa_promedio.png)
 
 La baja cobertura AOD no es un error del proyecto. Es esperable en una zona tropical con nubosidad frecuente. La columna de vapor de agua sí mantiene cobertura alta y queda como variable útil.
 
@@ -274,11 +276,11 @@ Para cumplir la lectura pedida en la Situación 1, también dejamos la serie men
 | O3 | 52 | 60,098 | 3.40 | 16.54 | 0.76 | 52.16 |
 | SO2 | 49 | 40,947 | 2.12 | 8.75 | 1.27 | 34.04 |
 
-![Serie temporal mensual media por contaminante DAGMA/CVC](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
+![Serie temporal mensual media por contaminante DAGMA/CVC](evidencias/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
 
 La segunda figura muestra la misma agregación mensual, separada por estación. Ahí se ve con claridad que NO2 solo aparece en ESTACIÓN YUMBO dentro del parquet principal.
 
-![Serie temporal mensual media por estación DAGMA/CVC](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
+![Serie temporal mensual media por estación DAGMA/CVC](evidencias/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
 
 Hay 10 estaciones dentro del BBox:
 
@@ -297,7 +299,7 @@ Hay 10 estaciones dentro del BBox:
 
 El hallazgo más delicado es NO2: solo Yumbo tiene datos en la verdad observada principal. Eso no invalida Situación 1, pero sí limita la validación posterior de modelos para NO2.
 
-![Cobertura temporal DAGMA/CVC](/docs/evidencias/situacion-3/dagma/figuras/dagma_cobertura_temporal.png)
+![Cobertura temporal DAGMA/CVC](../situacion-3/evidencias/dagma/figuras/dagma_cobertura_temporal.png)
 
 ## 12. Validaciones realizadas
 

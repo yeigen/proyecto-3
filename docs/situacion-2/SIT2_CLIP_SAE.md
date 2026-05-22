@@ -1,5 +1,7 @@
 # Situacion 2 — GeoVision-CLIP + SAE + AFE/AFC
 
+> Versión reorganizada: ver [índice de Situación 2](README.md) y [arquitectura CLIP + SAE](metodologia/arquitectura-clip-sae.md).
+
 ## Resumen
 
 Modelo multimodal CLIP fine-tuneado con LoRA sobre tiles Sentinel-2 (64x64x12) de Cali,
@@ -61,13 +63,13 @@ y luego buscan la escena S2 correspondiente.
 
 ### Distribucion espacial
 
-![Mapa de tiles por clase con estaciones DAGMA](../evidencias/situacion-2/muestreo/tiles/mapa_tiles_estaciones.png)
+![Mapa de tiles por clase con estaciones DAGMA](evidencias/muestreo/tiles/mapa_tiles_estaciones.png)
 
 suelo_urbano es la clase mas concentrada (desviacion estandar latitud 0.046, longitud 0.022) porque se muestrea alrededor de las estaciones DAGMA en el casco urbano. vegetacion_densa es la mas dispersa (desviacion estandar ~0.098) porque cubre todo el valle. contaminacion_alta_NO2 esta ligeramente mas al norte (media latitud 3.470) por la influencia de Yumbo.
 
 ### Separacion espectral NDVI vs NDBI
 
-![Separacion de clases en espacio NDVI vs NDBI](../evidencias/situacion-2/muestreo/tiles/separacion-clases.png)
+![Separacion de clases en espacio NDVI vs NDBI](evidencias/muestreo/tiles/separacion-clases.png)
 
 | Clase | NDVI medio | NDBI medio |
 |---|---|---|
@@ -83,7 +85,7 @@ lo que explica por que el CLIP los confunde. El modelo solo puede distinguirlos 
 
 ### Distribucion temporal
 
-![Distribucion temporal por ano](../evidencias/situacion-2/muestreo/tiles/tiles_diversidad_temporal.png)
+![Distribucion temporal por ano](evidencias/muestreo/tiles/tiles_diversidad_temporal.png)
 
 | Clase | Fechas unicas | Concentracion estacional |
 |---|---|---|
@@ -101,7 +103,7 @@ como separabilidad bajo distribución mezclada, no como generalización temporal
 
 ### Cobertura MODIS
 
-![Cobertura MODIS por clase](../evidencias/situacion-2/muestreo/tiles/cobertura-modis-tiles.png)
+![Cobertura MODIS por clase](evidencias/muestreo/tiles/cobertura-modis-tiles.png)
 
 | Variable MODIS | Cobertura promedio | Uso |
 |---|---|---|
@@ -114,7 +116,7 @@ Es inherente al producto, no un error. WV funciona bajo nubosidad parcial y alca
 
 ### Pseudo-labels S5P
 
-![Pseudo-labels S5P por clase](../evidencias/situacion-2/muestreo/tiles/distribucion.seudolabel-modis-tiles.png)
+![Pseudo-labels S5P por clase](evidencias/muestreo/tiles/distribucion.seudolabel-modis-tiles.png)
 
 Cada pseudo-label solo existe para su clase correspondiente:
 
@@ -206,6 +208,37 @@ Resultados v4:
 | k-NN accuracy (k=5) | 0.394 |
 
 Lectura: v4 baja frente al modelo final y no supera el KPI de Recall@1 >= 0.45. Aun así, bajo validación temporal sin fechas compartidas mantiene desempeño cercano a 2x chance y Recall@5 perfecto. Por eso se reporta como evidencia de robustez parcial, no como checkpoint principal.
+
+### Auditoría puente DAGMA/CVC
+
+Se creó `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb` para cruzar los tiles Sit 2 con mediciones oficiales DAGMA/CVC. Esta auditoría no valida CLIP como predictor; solo revisa coherencia externa entre pseudo-labels satelitales y observaciones cercanas.
+
+Configuración:
+
+| Elemento | Valor |
+|---|---|
+| Tiles revisados | 5,000 |
+| Observaciones DAGMA/CVC filtradas | 107,291 |
+| Días con datos DAGMA/CVC | 1,640 |
+| Contaminantes | NO2, SO2, O3 |
+| Ventanas temporales | mismo día, ±1 día, ±3 días |
+| Cruce espacial | estación más cercana que mide cada contaminante |
+
+Resultado por clase objetivo frente al resto:
+
+| Contaminante | Clase objetivo | Ventana | n objetivo | n resto | Mediana objetivo | Mediana resto | Lectura |
+|---|---|---:|---:|---:|---:|---:|---|
+| NO2 | contaminacion_alta_NO2 | 0 días | 50 | 362 | 14.88 | 13.32 | Coherente |
+| NO2 | contaminacion_alta_NO2 | ±1 día | 81 | 393 | 10.47 | 10.77 | Débil/inversa |
+| NO2 | contaminacion_alta_NO2 | ±3 días | 81 | 393 | 9.54 | 10.26 | Débil/inversa |
+| SO2 | contaminacion_alta_SO2 | 0 días | 141 | 399 | 6.04 | 9.89 | Débil/inversa |
+| SO2 | contaminacion_alta_SO2 | ±1 día | 146 | 448 | 7.66 | 10.12 | Débil/inversa |
+| SO2 | contaminacion_alta_SO2 | ±3 días | 146 | 448 | 7.55 | 10.51 | Débil/inversa |
+| O3 | ozono_anomalo | 0 días | 258 | 676 | 17.63 | 16.75 | Coherente |
+| O3 | ozono_anomalo | ±1 día | 272 | 689 | 15.51 | 16.28 | Débil/inversa |
+| O3 | ozono_anomalo | ±3 días | 272 | 718 | 14.67 | 15.83 | Débil/inversa |
+
+Lectura: la coherencia externa aparece solo en mismo día para NO2 y O3. SO2 no queda respaldado por la red de superficie en este cruce. El resultado no invalida Sit 2 porque el objetivo era aprender representaciones multimodales con pseudo-labels satelitales, pero sí limita cualquier interpretación causal o predictiva frente a mediciones in-situ.
 
 ## SAE — Sparse Autoencoder
 

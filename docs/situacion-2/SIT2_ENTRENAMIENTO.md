@@ -1,5 +1,7 @@
 # Sit 2 — Entrenamiento CLIP fine-tune (Stage 1)
 
+> Versión reorganizada: ver [índice de Situación 2](README.md) y [entrenamiento](metodologia/entrenamiento.md).
+
 Documento de resultados, problemas detectados y decisiones tomadas durante el fine-tune
 del notebook `notebooks/sit2/01_clip_v1_oficial.ipynb`.
 
@@ -238,6 +240,30 @@ Conclusión: v4 no reemplaza al modelo final porque R@1 cae por debajo del KPI d
 
 Checkpoint auxiliar: `edwardsx/geovision-clip-modelo-v4-group-split`.
 
+---
+
+## Auditorías de datos posteriores
+
+### Auditoría estadística de tiles
+
+Notebook: `notebooks/sit2/06_auditoria_estadistica_tiles.ipynb`.
+
+Verifica balance, rangos físicos, NaN/Inf, distribución temporal, SCL, MODIS y ERA5. No encontró un fallo fuerte que invalide Sit 2. Las alertas principales fueron baja cobertura MODIS AOD, temporalidad sesgada y poca presencia de `T18NUK`.
+
+### Auditoría puente DAGMA/CVC
+
+Notebook: `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb`.
+
+Cruza tiles Sit 2 con mediciones oficiales DAGMA/CVC por estación cercana y ventanas de 0, ±1 y ±3 días. Usa 107,291 observaciones filtradas y 1,640 días con datos.
+
+| Contaminante | Clase objetivo | Lectura principal |
+|---|---|---|
+| NO2 | `contaminacion_alta_NO2` | Coherente solo en mismo día; débil/inversa en ±1 y ±3 días. |
+| SO2 | `contaminacion_alta_SO2` | Débil/inversa en todas las ventanas. |
+| O3 | `ozono_anomalo` | Coherente solo en mismo día; débil/inversa en ±1 y ±3 días. |
+
+Conclusión: DAGMA/CVC funciona como auditoría puente hacia Sit 3, no como validación final de CLIP. El resultado permite defender coherencia puntual para NO2 y O3, pero obliga a reportar SO2 como señal débil frente a superficie.
+
 ### Notebooks creados
 
 | Notebook | Contenido |
@@ -247,6 +273,8 @@ Checkpoint auxiliar: `edwardsx/geovision-clip-modelo-v4-group-split`.
 | `notebooks/sit2/03_clip_v3_oficial.ipynb` | Re-entreno final sin S5P |
 | `notebooks/sit2/04_sae_oficial.ipynb` | SAE + AFE + AFC |
 | `notebooks/sit2/05_clip_v4_group_split.ipynb` | Auditoría temporal estricta v4 |
+| `notebooks/sit2/06_auditoria_estadistica_tiles.ipynb` | Auditoría estadística de tiles |
+| `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb` | Auditoría puente DAGMA/CVC |
 
 ## Referencias
 
@@ -255,4 +283,6 @@ Checkpoint auxiliar: `edwardsx/geovision-clip-modelo-v4-group-split`.
 - Notebook CLIP final: `notebooks/sit2/03_clip_v3_oficial.ipynb`
 - Notebook SAE/AFE/AFC: `notebooks/sit2/04_sae_oficial.ipynb`
 - Notebook auditoría temporal v4: `notebooks/sit2/05_clip_v4_group_split.ipynb`
+- Notebook auditoría estadística: `notebooks/sit2/06_auditoria_estadistica_tiles.ipynb`
+- Notebook auditoría puente DAGMA/CVC: `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb`
 - Conceptos: `docs/conceptos/clip-y-remoteclip.md`

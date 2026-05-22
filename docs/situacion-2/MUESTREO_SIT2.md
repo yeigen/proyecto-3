@@ -1,5 +1,7 @@
 # Muestreo estratificado para Situación 2
 
+> Versión reorganizada: ver [índice de Situación 2](README.md) y [muestreo estratificado](metodologia/muestreo.md).
+
 Cómo se generan los pares (tile S2 64×64×13, texto) para entrenar el CLIP+SAE.
 Documenta las **3 técnicas distintas** usadas según la fuente Zarr, los valores empíricos
 medidos sobre el panel real, y las referencias que validan cada decisión.
@@ -299,6 +301,18 @@ p10=0.34 km  p50=0.75 km  p90=1.10 km  max=1.38 km
 `suelo_urbano` queda restringido al núcleo de Cali (lat ∈ [3.37, 3.59], lon ∈
 [-76.56, -76.46]) por construcción (radio 1 km de DAGMA, las estaciones son
 urbanas).
+
+### Auditoría puente DAGMA/CVC
+
+Después del muestreo se cruzaron los tiles con mediciones oficiales DAGMA/CVC en `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb`. El cruce usa la estación más cercana por contaminante y ventanas de mismo día, ±1 día y ±3 días.
+
+| Contaminante | Cobertura mismo día | Cobertura ±3 días | Distancia mediana | Lectura |
+|---|---:|---:|---:|---|
+| NO2 | 8.2 % | 9.5 % | 16.58 km | Coherencia puntual en mismo día. |
+| SO2 | 10.8 % | 11.9 % | 5.65 km | No respalda la clase SO2. |
+| O3 | 18.7 % | 19.8 % | 5.00 km | Coherencia puntual en mismo día. |
+
+Esta auditoría no cambia el dataset ni el entrenamiento. Solo acota la interpretación: las clases de contaminación son pseudo-labels satelitales útiles para representación, no etiquetas in-situ directas.
 
 ### Pesos finales
 

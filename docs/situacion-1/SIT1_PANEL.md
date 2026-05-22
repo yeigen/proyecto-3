@@ -1,5 +1,7 @@
 # Situacion 1 — Panel de datos satelital
 
+> Versión reorganizada: ver [índice de Situación 1](README.md).
+
 ## Resumen
 
 Para una explicación narrativa del objetivo del proyecto y del alcance de esta fase, ver [`GUIA_PROYECTO_SIT1.md`](GUIA_PROYECTO_SIT1.md).
@@ -25,11 +27,11 @@ Razon del BBox ampliado (decision #1 documentada en JUSTIFICACIONES.md):
 2. Capturar Acopi — zona industrial satelite
 3. Capturar cultivos de cana — quemas estacionales que afectan calidad del aire
 
-![BBox comparacion](/docs/evidencias/situacion-1/panel/sit1_panel_bbox_pdf_vs_proyecto.png)
+![BBox comparacion](evidencias/panel/sit1_panel_bbox_pdf_vs_proyecto.png)
 
 Vista satelital del area de estudio:
 
-![Cali Google Earth](/docs/evidencias/situacion-1/panel/sit1_panel_cali_google_earth.png)
+![Cali Google Earth](evidencias/panel/sit1_panel_cali_google_earth.png)
 
 ## Arquitectura cloud
 
@@ -59,21 +61,21 @@ Justificacion de bandas en `/docs/DATASETS.md`.
 Bucket: `gs://fuentes-proyecto-3`
 Contenido: GeoTIFFs raw + paneles Zarr de las 6 fuentes.
 
-![bucket-gcs](/docs/evidencias/situacion-1/panel/sit1_panel_bucket_gcs.png)
+![bucket-gcs](evidencias/panel/sit1_panel_bucket_gcs.png)
 
 ### HuggingFace Hub (backup publico)
 
 Bucket: `yeigen/fuentes-proyecto-3`
 Contenido: 5 paneles Zarr pequenos (S5P, ERA5, MODIS). S2 vive solo en GCS por peso.
 
-![bucket-hf](/docs/evidencias/situacion-1/panel/sit1_panel_bucket_hugging_face.png)
+![bucket-hf](evidencias/panel/sit1_panel_bucket_hugging_face.png)
 
 ### Kaggle Dataset (consumo del equipo)
 
 Dataset: [`juanjoseorozcolopez/geovision-fuentes`](https://kaggle.com/datasets/juanjoseorozcolopez/geovision-fuentes)
 Volumen: 89.73 GB · 8,848 archivos en Kaggle. El manifest técnico registra 8,847 archivos de datos; Kaggle cuenta además `dataset-metadata.json`.
 
-![Kaggle dataset](/docs/evidencias/situacion-1/panel/sit1_panel_kaggle_dataset.png)
+![Kaggle dataset](evidencias/panel/sit1_panel_kaggle_dataset.png)
 
 ## EDA — Analisis Exploratorio
 
@@ -82,7 +84,7 @@ Volumen: 89.73 GB · 8,848 archivos en Kaggle. El manifest técnico registra 8,8
 **Distribucion temporal:** 1,552 escenas en total, cadencia 22-28 escenas/mes.
 A partir de 2025-04 aumenta a 28-39 escenas/mes (entrada en operacion de Sentinel-2C).
 
-![S2 temporal](/docs/evidencias/situacion-1/eda/sit1_eda_s2_distribucion_temporal_captura.png)
+![S2 temporal](evidencias/eda/sit1_eda_s2_distribucion_temporal_captura.png)
 
 **Filtro SCL:** Solo 136 escenas (8.8%) pasan el umbral SCL > 30%.
 La mediana de cobertura util por escena es 1.8% — la mayoria de escenas tienen menos de 2% de pixeles sin nubes.
@@ -94,20 +96,20 @@ La mediana de cobertura util por escena es 1.8% — la mayoria de escenas tienen
 | > 50% | 66 | 4.3% |
 | > 70% | 17 | 1.1% |
 
-![SCL distribucion](/docs/evidencias/situacion-1/eda/sentinel-2/s2_scl_distribucion_mensual.png)
+![SCL distribucion](evidencias/eda/sentinel-2/s2_scl_distribucion_mensual.png)
 
 **Tiles MGRS:** Solo 2 tiles cruzan el BBox. T18NUJ aporta 133 escenas utiles (97.8%), T18NUK solo 3 (2.2%). El modelo CLIP se entrena practicamente solo sobre T18NUJ.
 
 **NDVI:** Distribucion bimodal con picos en ~0.15 (urbano) y ~0.75 (vegetacion).
 Los umbrales del muestreo (NDVI < 0.3 urbano, > 0.6 vegetacion) caen exactamente en los valles del histograma.
 
-![NDVI](/docs/evidencias/situacion-1/eda/sentinel-2/s2_ndvi_distribucion.png)
+![NDVI](evidencias/eda/sentinel-2/s2_ndvi_distribucion.png)
 
 ### Sentinel-5P (NO2, SO2, O3)
 
 25,000+ escenas por contaminante, cadencia constante de 400-440 escenas/mes durante 5 anos.
 
-![S5P temporal](/docs/evidencias/situacion-1/eda/s5p/s5p_distribucion_temporal.png)
+![S5P temporal](evidencias/eda/s5p/s5p_distribucion_temporal.png)
 
 **Cobertura efectiva** (pixeles que pasan control de calidad):
 
@@ -122,7 +124,7 @@ SO2 usa un umbral mas permisivo (50% vs 75% de NO2).
 
 **Mapas promedio:** Dos hot-spots de NO2 claros: Yumbo (norte, lat ~3.5, corredor industrial) y Cali centro (lat ~3.4, trafico vehicular). SO2 muestra patron ruidoso (emision esporadica). O3 es casi uniforme (variabilidad espacial baja).
 
-![S5P mapas](/docs/evidencias/situacion-1/eda/s5p/s5p_mapas_promedio.png)
+![S5P mapas](evidencias/eda/s5p/s5p_mapas_promedio.png)
 
 **Percentiles S5P (full panel, usado para pseudo-labels del muestreo):**
 
@@ -155,7 +157,7 @@ Justifica la decision #1 (BBox ampliado para capturar Yumbo).
 **Correlaciones entre variables:** Solo 3 pares superan |r| > 0.5:
 T2m-Td2m (0.71), T2m-BLH (0.64), Td2m-p_surf (0.61). Las 8 variables son complementarias.
 
-![ERA5 ciclo](/docs/evidencias/situacion-1/eda/era5/era5_ciclo_diurno.png)
+![ERA5 ciclo](evidencias/eda/era5/era5_ciclo_diurno.png)
 
 ### MODIS MAIAC AOD
 
@@ -185,7 +187,7 @@ WV mantiene 96% porque funciona bajo nubosidad parcial.
 | modis_AOD_047 | 767 / 5,000 (15.3%) | 0.317 |
 | modis_WV | 4,897 / 5,000 (97.9%) | 1.787 cm |
 
-![MODIS v3](/docs/evidencias/situacion-1/eda/modis/v2/modis_mapa_promedio.png)
+![MODIS v3](evidencias/eda/modis/v2/modis_mapa_promedio.png)
 
 ### DAGMA / SISAIRE
 
@@ -248,23 +250,23 @@ La cobertura disminuye drasticamente a partir de 2021. Yumbo CVC es la unica est
 | O3 | 52 | 60,098 | 3.40 | 16.54 | 0.76 | 52.16 |
 | SO2 | 49 | 40,947 | 2.12 | 8.75 | 1.27 | 34.04 |
 
-![DAGMA serie temporal media por contaminante](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
+![DAGMA serie temporal media por contaminante](evidencias/eda/dagma/dagma_serie_temporal_media_contaminantes.png)
 
 Serie temporal mensual por estacion y contaminante:
 
-![DAGMA serie temporal media por estacion](/docs/evidencias/situacion-1/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
+![DAGMA serie temporal media por estacion](evidencias/eda/dagma/dagma_serie_temporal_media_por_estacion.png)
 
 Cobertura temporal por estacion:
 
-![DAGMA cobertura temporal](/docs/evidencias/situacion-3/dagma/figuras/dagma_cobertura_temporal.png)
+![DAGMA cobertura temporal](../situacion-3/evidencias/dagma/figuras/dagma_cobertura_temporal.png)
 
 Distribuciones por estacion y contaminante:
 
-![DAGMA distribuciones](/docs/evidencias/situacion-3/dagma/figuras/dagma_distribuciones_por_estacion.png)
+![DAGMA distribuciones](../situacion-3/evidencias/dagma/figuras/dagma_distribuciones_por_estacion.png)
 
 Ciclo diurno de contaminantes:
 
-![DAGMA ciclo diurno](/docs/evidencias/situacion-3/dagma/figuras/dagma_ciclo_diurno.png)
+![DAGMA ciclo diurno](../situacion-3/evidencias/dagma/figuras/dagma_ciclo_diurno.png)
 
 ### Excel SVCASC — fuente complementaria
 

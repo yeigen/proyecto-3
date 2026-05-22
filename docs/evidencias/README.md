@@ -1,31 +1,26 @@
 # Evidencias visuales
 
-Esta carpeta guarda todas las imágenes del proyecto que se usan para documentación, informe, defensa o referencia visual. Las imágenes no deben quedar dispersas en `capturas/`, `imagenes-referencias/`, `entrenamiento/`, `arquitecturas/` ni dentro de carpetas de documentación específicas.
+Las imágenes finales fueron movidas a la carpeta de cada situación.
 
-## Estructura
+## Índices principales
+
+- [Evidencias Situación 1](../situacion-1/evidencias/README.md)
+- [Evidencias Situación 2](../situacion-2/evidencias/README.md)
+- [Evidencias Situación 3](../situacion-3/evidencias/README.md)
+
+## Ubicación actual
 
 ```text
-docs/evidencias/
-├── situacion-1/
-│   ├── panel/
-│   ├── eda/
-│   └── fuentes/
-├── situacion-2/
-│   ├── muestreo/
-│   ├── entrenamiento/
-│   └── arquitectura/
-└── situacion-3/
-    ├── dagma/
-    └── modelos/
+docs/situacion-1/evidencias/
+docs/situacion-2/evidencias/
+docs/situacion-3/evidencias/
 ```
 
-## Regla principal
+## Carpetas históricas
 
-- Toda imagen final o de referencia vive bajo `docs/evidencias/`.
-- Los notebooks pueden generar imágenes temporalmente en su entorno de ejecución, pero las imágenes que entren a documentación se copian o mueven aquí.
-- No guardar capturas finales como `captura1.png`, `plot.png` o `imagen_final.png`.
+Las carpetas `docs/evidencias/situacion-*` quedan solo como punteros de migración. No deben recibir imágenes nuevas.
 
-## Nombres
+## Criterio de nombres
 
 Usar nombres completos y trazables:
 
@@ -34,7 +29,3 @@ sit1_panel_kaggle_dataset.png
 sit2_entrenamiento_curvas_aprendizaje.png
 sit3_dagma_excel_parquet_correlacion_variables.png
 ```
-
-## Criterio
-
-Una imagen entra aquí si respalda una decisión, hallazgo, resultado o explicación del proyecto.

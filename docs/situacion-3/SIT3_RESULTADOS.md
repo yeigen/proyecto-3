@@ -1,5 +1,7 @@
 # Situacion 3 — ConvLSTM + Kriging + LOO-CV
 
+> Versión reorganizada: ver [índice de Situación 3](README.md) y [ConvLSTM, Kriging y LOO-CV](metodologia/convlstm-kriging-loocv.md).
+
 ## Resumen
 
 Pipeline geoestadistico para estimar concentraciones de NO2, SO2 y O3 en puntos no muestreados de Cali.

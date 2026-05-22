@@ -1,5 +1,7 @@
 # Auditoría de sesgos Sit 1 → Sit 2
 
+> Versión reorganizada: ver [índice de Situación 2](README.md) y [auditoría de sesgos](metodologia/auditoria-sesgos.md).
+
 Esta auditoría revisa si el panel satelital de Situación 1 pudo introducir fallos o sesgos en el muestreo y entrenamiento de Situación 2.
 
 ## Veredicto corto
@@ -10,6 +12,7 @@ No encontramos un fallo que invalide las métricas principales de CLIP v3. Sí e
 2. La clase `ozono_anomalo` usa O3 de columna total S5P, con alta nubosidad en los hot pixels.
 3. Sentinel-2 fue exportado a grilla 10 m con remuestreo nearest-neighbor para bandas nativas de 20 m y 60 m.
 4. MODIS tuvo versiones rotas en GCS, pero el `tiles_meta.parquet` final de Kaggle contiene valores físicos.
+5. El cruce puente con DAGMA/CVC muestra coherencia externa puntual para NO2 y O3 en mismo día, pero no respalda SO2 ni ventanas temporales amplias.
 
 ## 1. MODIS
 
@@ -184,14 +187,55 @@ Para una versión más estricta:
 - probar `SCL_THRESHOLD >= 0.7` como ablación;
 - reportar métricas por bins de `scl_pct`.
 
+## 5. Auditoría puente DAGMA/CVC
+
+### Evidencia
+
+Se ejecutó `notebooks/sit2/07_auditoria_puente_dagma_tiles.ipynb` localmente con `pyarrow` vía `uv`. El notebook cruzó los 5,000 tiles de Sit 2 contra 107,291 observaciones DAGMA/CVC filtradas, agregadas por día, usando la estación más cercana que mide cada contaminante.
+
+Cobertura del cruce:
+
+| Contaminante | Distancia mediana tile-estación | Cobertura mismo día | Cobertura ±3 días | Nota espacial |
+|---|---:|---:|---:|---|
+| NO2 | 16.58 km | 8.2 % | 9.5 % | Solo `ESTACIÓN YUMBO` mide NO2 en el parquet. |
+| O3 | 5.00 km | 18.7 % | 19.8 % | Red más distribuida. |
+| SO2 | 5.65 km | 10.8 % | 11.9 % | Red distribuida, pero señal no coincide con clase SO2. |
+
+Comparación clase objetivo vs resto:
+
+| Contaminante | Ventana | Mediana objetivo | Mediana resto | Lectura |
+|---|---:|---:|---:|---|
+| NO2 | 0 días | 14.88 | 13.32 | Coherente |
+| NO2 | ±1 día | 10.47 | 10.77 | Débil/inversa |
+| NO2 | ±3 días | 9.54 | 10.26 | Débil/inversa |
+| SO2 | 0 días | 6.04 | 9.89 | Débil/inversa |
+| SO2 | ±1 día | 7.66 | 10.12 | Débil/inversa |
+| SO2 | ±3 días | 7.55 | 10.51 | Débil/inversa |
+| O3 | 0 días | 17.63 | 16.75 | Coherente |
+| O3 | ±1 día | 15.51 | 16.28 | Débil/inversa |
+| O3 | ±3 días | 14.67 | 15.83 | Débil/inversa |
+
+### Veredicto
+
+La auditoría DAGMA/CVC es una validación externa débil, no una validación final. Sirve como puente hacia Sit 3:
+
+- NO2 y O3 muestran coherencia puntual cuando la comparación se hace en el mismo día.
+- SO2 no queda respaldado por mediciones de superficie cercanas.
+- Al ampliar la ventana temporal, la señal se diluye o se invierte.
+- La cobertura temporal efectiva es baja, especialmente para NO2 y SO2.
+
+Esto no invalida el entrenamiento CLIP v3, porque Sit 2 usa pseudo-labels satelitales para aprender representaciones. Sí obliga a declarar que las clases de contaminación no deben interpretarse como predictores directos de concentración in-situ.
+
 ## Conclusión
 
-La Situación 2 es defendible si se presenta con dos niveles de evidencia:
+La Situación 2 es defendible si se presenta con tres niveles de evidencia:
 
 1. v2/v3 como modelo final: cumple los KPIs principales bajo el split original y corrige el data leakage por S5P.
 2. v4 como auditoría temporal: no reemplaza al modelo final, pero muestra robustez parcial cuando no hay fechas compartidas entre train y validación.
+3. DAGMA/CVC como auditoría puente: aporta coherencia puntual para NO2 y O3 en mismo día, pero no valida predicción in-situ ni respalda SO2.
 
-Los dos riesgos que siguen afectando la interpretación son:
+Los riesgos que siguen afectando la interpretación son:
 
 1. La generalización espacial estricta no fue probada; `suelo_urbano` queda cerca de train por construcción del muestreo DAGMA.
 2. La clase O3 usa columna total con alta nubosidad y puede capturar régimen atmosférico/estacional más que contaminación superficial directa.
+3. SO2 queda como la clase de contaminación más débil frente al cruce externo DAGMA/CVC.

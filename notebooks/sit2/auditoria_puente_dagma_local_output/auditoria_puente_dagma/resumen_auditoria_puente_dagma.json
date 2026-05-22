@@ -1,0 +1,121 @@
+{
+  "n_tiles": 5000,
+  "n_observaciones_dagma_filtradas": 107291,
+  "n_dias_dagma": 1640,
+  "ventanas_dias": [
+    0,
+    1,
+    3
+  ],
+  "comparaciones": [
+    {
+      "contaminante": "NO2",
+      "clase_objetivo": "contaminacion_alta_NO2",
+      "ventana_dias": 0,
+      "n_objetivo": 50,
+      "n_resto": 362,
+      "mediana_objetivo": 14.880952380952381,
+      "mediana_resto": 13.31547619047619,
+      "diferencia_mediana": 1.5654761904761916,
+      "percentil_mediana_objetivo": 0.837378640776699,
+      "lectura": "coherente"
+    },
+    {
+      "contaminante": "NO2",
+      "clase_objetivo": "contaminacion_alta_NO2",
+      "ventana_dias": 1,
+      "n_objetivo": 81,
+      "n_resto": 393,
+      "mediana_objetivo": 10.472916666666668,
+      "mediana_resto": 10.773290598290599,
+      "diferencia_mediana": -0.30037393162393045,
+      "percentil_mediana_objetivo": 0.48523206751054854,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "NO2",
+      "clase_objetivo": "contaminacion_alta_NO2",
+      "ventana_dias": 3,
+      "n_objetivo": 81,
+      "n_resto": 393,
+      "mediana_objetivo": 9.543809023609443,
+      "mediana_resto": 10.25945054945055,
+      "diferencia_mediana": -0.7156415258411073,
+      "percentil_mediana_objetivo": 0.48523206751054854,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "SO2",
+      "clase_objetivo": "contaminacion_alta_SO2",
+      "ventana_dias": 0,
+      "n_objetivo": 141,
+      "n_resto": 399,
+      "mediana_objetivo": 6.043809523809524,
+      "mediana_resto": 9.894,
+      "diferencia_mediana": -3.850190476190476,
+      "percentil_mediana_objetivo": 0.4222222222222222,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "SO2",
+      "clase_objetivo": "contaminacion_alta_SO2",
+      "ventana_dias": 1,
+      "n_objetivo": 146,
+      "n_resto": 448,
+      "mediana_objetivo": 7.657061617883868,
+      "mediana_resto": 10.123633540372671,
+      "diferencia_mediana": -2.4665719224888027,
+      "percentil_mediana_objetivo": 0.44107744107744107,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "SO2",
+      "clase_objetivo": "contaminacion_alta_SO2",
+      "ventana_dias": 3,
+      "n_objetivo": 146,
+      "n_resto": 448,
+      "mediana_objetivo": 7.5486775206474075,
+      "mediana_resto": 10.508418972332015,
+      "diferencia_mediana": -2.9597414516846072,
+      "percentil_mediana_objetivo": 0.43602693602693604,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "O3",
+      "clase_objetivo": "ozono_anomalo",
+      "ventana_dias": 0,
+      "n_objetivo": 258,
+      "n_resto": 676,
+      "mediana_objetivo": 17.629166666666666,
+      "mediana_resto": 16.75263157894737,
+      "diferencia_mediana": 0.8765350877192972,
+      "percentil_mediana_objetivo": 0.5535331905781584,
+      "lectura": "coherente"
+    },
+    {
+      "contaminante": "O3",
+      "clase_objetivo": "ozono_anomalo",
+      "ventana_dias": 1,
+      "n_objetivo": 272,
+      "n_resto": 689,
+      "mediana_objetivo": 15.508273420479302,
+      "mediana_resto": 16.280555555555555,
+      "diferencia_mediana": -0.772282135076253,
+      "percentil_mediana_objetivo": 0.4838709677419355,
+      "lectura": "débil o inversa"
+    },
+    {
+      "contaminante": "O3",
+      "clase_objetivo": "ozono_anomalo",
+      "ventana_dias": 3,
+      "n_objetivo": 272,
+      "n_resto": 718,
+      "mediana_objetivo": 14.670843620103543,
+      "mediana_resto": 15.830681829253441,
+      "diferencia_mediana": -1.159838209149898,
+      "percentil_mediana_objetivo": 0.45656565656565656,
+      "lectura": "débil o inversa"
+    }
+  ],
+  "nota": "Auditoría externa de coherencia. No constituye validación predictiva directa de CLIP ni de los embeddings."
+}

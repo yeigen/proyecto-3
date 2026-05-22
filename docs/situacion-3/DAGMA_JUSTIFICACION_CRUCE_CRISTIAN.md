@@ -1,5 +1,7 @@
 # Justificación del cruce DAGMA Cristian
 
+> Versión reorganizada: ver [índice de Situación 3](README.md) y [verdad observada](metodologia/verdad-observada.md).
+
 ## Decisión
 
 Para NO2, SO2 y O3, la verdad observada principal será el parquet SISAIRE/DAGMA-CVC:
@@ -14,9 +16,9 @@ El Excel de Cristian (`dagma/dagma-cristian.xlsx`) y los CSV derivados se conser
 
 El parquet tiene un esquema normalizado: fecha, estación, contaminante, valor, unidad y coordenadas por fila. Además, tiene manifest con trazabilidad de origen.
 
-![Estructura del parquet DAGMA](../evidencias/situacion-3/dagma/sit3_dagma_parquet_estructura.png)
+![Estructura del parquet DAGMA](evidencias/dagma/sit3_dagma_parquet_estructura.png)
 
-![Carga del parquet principal](../evidencias/situacion-3/dagma/sit3_dagma_parquet_carga_principal.png)
+![Carga del parquet principal](evidencias/dagma/sit3_dagma_parquet_carga_principal.png)
 
 Criterios para usarlo como verdad observada:
 
@@ -30,7 +32,7 @@ Criterios para usarlo como verdad observada:
 
 El Excel tiene más variables que el parquet: PM10, PM25, H2S, meteorología y Black Carbon. Eso lo hace útil, pero también confirma que es otra fuente/procesamiento.
 
-![Carga del Excel SVCASC Cristian](../evidencias/situacion-3/dagma/sit3_dagma_excel_svcasc_carga.png)
+![Carga del Excel SVCASC Cristian](evidencias/dagma/sit3_dagma_excel_svcasc_carga.png)
 
 Diferencias principales:
 
@@ -48,15 +50,15 @@ El Excel no se descarta. Se usa como apoyo para variables que el parquet no tien
 
 Se cruzaron ambas fuentes por fecha, estación y variable. El cruce produjo 35,184 registros coincidentes.
 
-![Cruce de estaciones entre Excel y parquet](../evidencias/situacion-3/dagma/sit3_dagma_excel_parquet_cruce_estaciones.png)
+![Cruce de estaciones entre Excel y parquet](evidencias/dagma/sit3_dagma_excel_parquet_cruce_estaciones.png)
 
-![Registros coincidentes entre Excel y parquet](../evidencias/situacion-3/dagma/sit3_dagma_excel_parquet_registros_coincidentes.png)
+![Registros coincidentes entre Excel y parquet](evidencias/dagma/sit3_dagma_excel_parquet_registros_coincidentes.png)
 
 El cruce no prueba equivalencia. Solo dice que existen registros comparables en fecha, estación y variable. Para decidir si una fuente puede reemplazar a la otra, hay que mirar correlación y diferencias.
 
 ## 4. Evidencia estadística: no son fuentes equivalentes
 
-![Correlación entre variables coincidentes](../evidencias/situacion-3/dagma/sit3_dagma_excel_parquet_correlacion_variables.png)
+![Correlación entre variables coincidentes](evidencias/dagma/sit3_dagma_excel_parquet_correlacion_variables.png)
 
 | Variable | Registros | Correlación r | Diferencia media | Mediana diferencia | p75 diferencia |
 |---|---:|---:|---:|---:|---:|
@@ -85,7 +87,7 @@ Conclusión estadística: Excel y parquet no son intercambiables para NO2/SO2/O3
 
 El parquet tiene NO2 solo en Yumbo. El Excel tiene NO2 en Univalle. Combinarlos aumenta el número de mediciones, pero mezcla dos cosas al mismo tiempo: estación y fuente.
 
-![NO2 combinado Yumbo-Univalle](../evidencias/situacion-3/dagma/sit3_dagma_no2_yumbo_univalle_combinado.png)
+![NO2 combinado Yumbo-Univalle](evidencias/dagma/sit3_dagma_no2_yumbo_univalle_combinado.png)
 
 | Fuente | Estación | Mediciones NO2 |
 |---|---|---:|
@@ -103,31 +105,31 @@ Las figuras del EDA ayudan a explicar la cobertura espacial, temporal y por cont
 
 ### Estaciones y BBox
 
-![Estaciones DAGMA vs tiles MGRS](../evidencias/situacion-3/dagma/figuras/dagma_estaciones_vs_tile_mgrs.png)
+![Estaciones DAGMA vs tiles MGRS](evidencias/dagma/figuras/dagma_estaciones_vs_tile_mgrs.png)
 
 Esta figura muestra que las estaciones están dentro del dominio operativo del proyecto y permite distinguir la estación CVC Yumbo de las estaciones DAGMA.
 
 ### Cobertura temporal
 
-![Cobertura temporal DAGMA](../evidencias/situacion-3/dagma/figuras/dagma_cobertura_temporal.png)
+![Cobertura temporal DAGMA](evidencias/dagma/figuras/dagma_cobertura_temporal.png)
 
 La cobertura no es homogénea. Algunas estaciones tienen muchos más meses activos que otras. Esto afecta LOO-CV porque no todas las estaciones aportan la misma cantidad de observaciones.
 
 ### Distribuciones por estación y contaminante
 
-![Distribuciones DAGMA por estación](../evidencias/situacion-3/dagma/figuras/dagma_distribuciones_por_estacion.png)
+![Distribuciones DAGMA por estación](evidencias/dagma/figuras/dagma_distribuciones_por_estacion.png)
 
 Cada contaminante tiene distinta disponibilidad por estación. NO2 es el caso más limitado: en el parquet solo aparece en Yumbo.
 
 ### Ciclo diurno
 
-![Ciclo diurno DAGMA](../evidencias/situacion-3/dagma/figuras/dagma_ciclo_diurno.png)
+![Ciclo diurno DAGMA](evidencias/dagma/figuras/dagma_ciclo_diurno.png)
 
 El ciclo diurno muestra que los picos de NO2 y SO2 no necesariamente coinciden con el pase satelital de Sentinel-5P. Esto justifica usar datos horarios y no solo promedios satelitales.
 
 ### Año 2020
 
-![DAGMA 2020 cobertura y ciclo](../evidencias/situacion-3/dagma/figuras/dagma_2020_cobertura_y_ciclo.png)
+![DAGMA 2020 cobertura y ciclo](evidencias/dagma/figuras/dagma_2020_cobertura_y_ciclo.png)
 
 DAGMA tiene datos en 2020, pero el panel satelital útil comienza en 2021. Por eso 2020 sirve como contexto histórico, no como validación directa del panel satelital.
 
