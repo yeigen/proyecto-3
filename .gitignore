@@ -7,3 +7,6 @@ hugging-face/staging/
 __pycache__/
 csv/dagma/
 data/
+.understand-anything/
+.claude
+superpowers/
