@@ -31,4 +31,4 @@ Situación 3 debe reportarse con honestidad: Kriging da errores absolutos razona
 - [Kriging y LOO-CV](kriging-loocv.md)
 - [ConvLSTM](convlstm.md)
 - [Resultados Situación 3 original](../SIT3_RESULTADOS.md)
-- [Moran's I — PySAL esda](https://pysal.org/esda/generated/esda.Moran.html)
+- [PySAL esda stable documentation](https://pysal.org/esda/stable/)

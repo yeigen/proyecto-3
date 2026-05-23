@@ -35,6 +35,8 @@ La Situación 2 toma el panel satelital validado en Situación 1 y genera 5,000 
 
 - [Resultados de muestreo](resultados/resultados-muestreo.md)
 - [Resultados CLIP](resultados/resultados-clip.md)
+- [Resultados CLIP Sit 2.1 reparación](resultados/resultados-clip-sit2-1-reparacion.md)
+- [Resultados CLIP Sit 2.17 pseudo-label retrieval](resultados/resultados-clip-sit2-17-pseudolabel.md)
 - [Resultados SAE, AFE y AFC](resultados/resultados-sae-afe-afc.md)
 - [Auditoría DAGMA/CVC](resultados/auditoria-dagma-cvc.md)
 

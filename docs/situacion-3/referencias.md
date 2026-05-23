@@ -8,7 +8,7 @@
 - [Kriging — PyKrige](https://geostat-framework.readthedocs.io/projects/pykrige/en/stable/)
 - [Ordinary Kriging — scikit-gstat](https://scikit-gstat.readthedocs.io/en/latest/userguide/kriging.html)
 - [ConvLSTM paper](https://arxiv.org/abs/1506.04214)
-- [Moran's I — PySAL esda](https://pysal.org/esda/generated/esda.Moran.html)
+- [PySAL esda stable documentation](https://pysal.org/esda/stable/)
 
 ## Plataformas del proyecto
 

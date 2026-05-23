@@ -36,7 +36,7 @@ Referencias externas e internas compartidas por la documentación reorganizada.
 - [LoRA paper](https://arxiv.org/abs/2106.09685)
 - [ConvLSTM paper](https://arxiv.org/abs/1506.04214)
 - [Kriging — PyKrige](https://geostat-framework.readthedocs.io/projects/pykrige/en/stable/)
-- [Moran's I — PySAL esda](https://pysal.org/esda/generated/esda.Moran.html)
+- [PySAL esda stable documentation](https://pysal.org/esda/stable/)
 - [NDVI original Rouse et al.](https://ntrs.nasa.gov/citations/19740022614)
 
 ## Referencias por carpeta
