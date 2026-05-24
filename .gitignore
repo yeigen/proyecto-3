@@ -1,0 +1,14 @@
+.venv
+.env
+logger/logs/
+hugging-face/descargas/
+hugging-face/cache/
+hugging-face/staging/
+__pycache__/
+csv/dagma/
+data/
+.understand-anything/
+.claude
+superpowers/fuentes-proyecto-3/
+pagina_web/frontend/dist/
+pagina_web/frontend/node_modules/

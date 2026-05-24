@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/static/grids:/app/backend/static/grids
+      - ./checkpoint-kaggle:/app/checkpoint-kaggle
+      - ./fuentes-proyecto-3:/app/fuentes-proyecto-3
+    restart: unless-stopped
+    networks:
+      - geovision
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - geovision
+
+networks:
+  geovision:
+    driver: bridge
