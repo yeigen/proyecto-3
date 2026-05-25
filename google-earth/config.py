@@ -9,8 +9,6 @@ FUENTES = [
     ('ECMWF/ERA5/HOURLY'),           # https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_HOURLY (atmospheric, tiene BLH y RH)
     ('MODIS/061/MCD19A2_GRANULES')]  # https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES?hl=es-419
 
-# Rangos de disponibilidad reales (ver docs/DISPONIBLIDAD_DATOS.txt)
-
 DISPONIBILIDAD = {
     'COPERNICUS/S5P/OFFL/L3_NO2':   ('2021-01-01', '2026-01-01'),
     'COPERNICUS/S5P/OFFL/L3_SO2':   ('2021-01-01', '2026-01-01'),
