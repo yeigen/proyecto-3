@@ -1,0 +1,11 @@
+Top neuronas selectivas por clase (selectividad = activación clase - promedio otras clases):
+  contaminacion_alta_NO2         top neuronas: [70, 192, 101, 71, 190] | selectividad max: 0.855
+  contaminacion_alta_SO2         top neuronas: [162, 231, 199, 240, 136] | selectividad max: 0.734
+  ozono_anomalo                  top neuronas: [231, 221, 240, 133, 199] | selectividad max: 0.796
+  suelo_urbano                   top neuronas: [48, 132, 187, 175, 12] | selectividad max: 2.010
+  vegetacion_densa               top neuronas: [162, 245, 239, 104, 255] | selectividad max: 2.778
+
+<Figure size 1050x400 with 2 Axes>
+
+Sparsity global SAE: 0.7912
+Neuronas 'muertas' (activas <1% del tiempo): 129/256 (50.4%)

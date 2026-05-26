@@ -1,0 +1,19 @@
+{
+  "modelo_checkpoint": "/home/yeigen/Documents/proyecto-3/data/modelo-sit2/geovision_clip_sit2_best.pt",
+  "md5_checkpoint": "a8e6cd3e16f8d1ea64ddb98b67b68bfb",
+  "epoch_ganador": 26,
+  "total_epochs": 26,
+  "mejor_val_recall1_fusion": 0.6755555272102356,
+  "mejor_val_recall5_fusion": 0.9244444370269775,
+  "mejor_val_sparsity": 0.8014583587646484,
+  "min_val_mse": 0.00933009758591652,
+  "parametros_totales_millones": 210.28,
+  "textos_candidatos": 25,
+  "leakage_detectado_textos": 0,
+  "hyperparams_modificados_vs_default": [
+    "aux_cls_weight",
+    "train_last_blocks",
+    "label_smoothing",
+    "sae_l1_reg"
+  ]
+}

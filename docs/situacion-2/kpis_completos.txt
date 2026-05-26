@@ -1,0 +1,20 @@
+                             KPI     valor  minimo  excelente tipo  cumple  \
+0          Recall@1 imagen-texto  0.653333    0.45       0.65  max    True   
+1          Recall@5 imagen-texto  0.848889    0.70       0.85  max    True   
+2      Sparsity ratio SAE visual  0.791684    0.70       0.85  max    True   
+3  Loss reconstrucción SAE (MSE)  0.010633    0.05       0.02  min    True   
+4         Varianza explicada AFE  0.807977    0.80       0.90  max    True   
+5             RMSEA (modelo AFC)  0.103130    0.08       0.05  min   False   
+6               CFI (modelo AFC)  0.952649    0.90       0.95  max    True   
+
+       nivel  
+0  EXCELENTE  
+1         OK  
+2         OK  
+3  EXCELENTE  
+4         OK  
+5  NO CUMPLE  
+6  EXCELENTE  
+
+  KPIs cumplidos (mínimo): 6/7
+  KPIs en EXCELENTE: 3/7

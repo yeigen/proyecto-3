@@ -1,0 +1,4 @@
+dataset,n,silhouette,RF_accuracy,LDA_accuracy,ANOVA_F_NDVI,Mahalanobis_media,r_NDVI_NDBI
+rescate-1500,1500,0.282,0.796,0.727,3562.2,1.53,-0.956
+originales (5000),5000,-0.023,0.503,0.484,1816.0,1.13,-0.928
+v3 (1150),1150,0.033,0.526,0.483,413.4,1.04,-0.911

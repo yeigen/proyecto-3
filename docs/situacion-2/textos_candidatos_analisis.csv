@@ -1,0 +1,26 @@
+texto,clase,longitud,palabras,leakage
+"tile con firma de combustión vehicular sobre el sur de Cali, superficie predominantemente natural; compatible con tráfico vehicular intenso",contaminacion_alta_NO2,139,19,False
+"paisaje con concentración alta de óxidos de nitrógeno sobre el occidente de Cali en periodo de veranillo, asociada a centro urbano de alta actividad",contaminacion_alta_NO2,148,24,False
+"tile con firma de combustión vehicular sobre el norte de Cali, superficie predominantemente natural; sugerente de fuente puntual industrial activa",contaminacion_alta_NO2,146,20,False
+"imagen satelital con emisiones elevadas de NO2 en el norte de Cali, área parcialmente construida; asociada a centro urbano de alta actividad",contaminacion_alta_NO2,140,22,False
+"tile con firma de combustión vehicular sobre el suroccidente de Cali, superficie predominantemente natural; asociada a centro urbano de alta actividad",contaminacion_alta_NO2,150,21,False
+"observación satelital con SO2 vertical alto sobre el oriente de Cali, vegetación abundante; asociada a corredor industrial Yumbo-Acopi",contaminacion_alta_SO2,134,18,False
+"tile Sentinel-2 con alta columna de dióxido de azufre sobre el suroccidente de Cali en periodo de veranillo, vegetación abundante; compatible con quema de biomasa cañera",contaminacion_alta_SO2,169,26,False
+"imagen con firma de SO2 atmosférico sobre el suroriente de Cali, superficie predominantemente natural; sugerente de emisión industrial regional",contaminacion_alta_SO2,143,19,False
+"paisaje con emisión elevada de azufre en el suroriente de Cali en periodo lluvioso tardío, compatible con quema de biomasa cañera",contaminacion_alta_SO2,129,21,False
+"paisaje con emisión elevada de azufre en el nororiente de Cali en periodo lluvioso temprano, consistente con planta termoeléctrica o caldera",contaminacion_alta_SO2,140,21,False
+"observación con anomalía de ozono sobre el nororiente de Cali, superficie predominantemente natural; asociada a episodio de transporte regional",ozono_anomalo,143,19,False
+"tile con ozono troposférico desviado del comportamiento estacional en el suroriente de Cali, con perfil estacional desviado de la media histórica",ozono_anomalo,145,21,False
+"observación con anomalía de ozono sobre el noroccidente de Cali, superficie predominantemente natural; sugerente de inversión térmica con acumulación de precursores",ozono_anomalo,164,21,False
+"tile con ozono troposférico desviado del comportamiento estacional en el suroriente de Cali, compatible con evento de calidad del aire reportable",ozono_anomalo,145,21,False
+"paisaje asociado a actividad fotoquímica regional en el noroccidente de Cali en periodo lluvioso tardío, consistente con fotoquímica intensa de tarde tropical",ozono_anomalo,158,22,False
+"observación dominada por edificación y vías en el noroccidente de Cali, escasa cobertura vegetal; con superficie impermeable continua y techos visibles",suelo_urbano,151,21,False
+"observación dominada por edificación y vías en el occidente de Cali, vegetación dispersa; con superficie impermeable continua y techos visibles",suelo_urbano,143,20,False
+"tile con cobertura urbana extendida sobre el noroccidente de Cali en periodo de veranillo, sugerente de área comercial o industrial construida",suelo_urbano,142,21,False
+"imagen con infraestructura construida continua en el noroccidente de Cali, escasa cobertura vegetal; sugerente de área comercial o industrial construida",suelo_urbano,152,20,False
+"observación dominada por edificación y vías en el norte de Cali, escasa cobertura vegetal; consistente con barrio de alta densidad de edificación",suelo_urbano,145,22,False
+"observación con firma espectral de bosque o cultivo cerrado en el nororiente de Cali en periodo seco, con dosel continuo y baja perturbación visible",vegetacion_densa,148,24,False
+"observación con firma espectral de bosque o cultivo cerrado en el sur de Cali en periodo lluvioso temprano, consistente con cultivo cerrado de ciclo largo",vegetacion_densa,154,25,False
+"paisaje con vegetación abundante y baja urbanización sobre el nororiente de Cali, compatible con caña de azúcar madura",vegetacion_densa,118,18,False
+"imagen dominada por canopia continua en el oriente de Cali, superficie predominantemente natural; sugerente de bosque seco tropical conservado",vegetacion_densa,142,19,False
+"imagen multiespectral con biomasa vegetal alta en el suroccidente de Cali en periodo seco, sugerente de bosque seco tropical conservado",vegetacion_densa,135,20,False

@@ -1,0 +1,86 @@
+{
+  "bbox": [
+    -76.65,
+    3.3,
+    -76.3,
+    3.65
+  ],
+  "dagma": {
+    "estaciones_total": 9,
+    "estaciones_por_gas": {
+      "no2": 2,
+      "o3": 7,
+      "so2": 5
+    },
+    "obs_horarias": 300025,
+    "cobertura_temporal_anios": 4.0
+  },
+  "sentinel5p": {
+    "no2_obs": 25592,
+    "so2_obs": 25829,
+    "o3_obs": 25716
+  },
+  "era5": {
+    "horas": 43824,
+    "anios": 5.0,
+    "bandas": [
+      "T2m",
+      "Td2m",
+      "u10",
+      "v10",
+      "BLH",
+      "RH850",
+      "psurf",
+      "precip"
+    ]
+  },
+  "tiles_separabilidad": [
+    {
+      "dataset": "rescate-1500",
+      "silhouette": 0.282,
+      "rf_acc": 0.796
+    },
+    {
+      "dataset": "originales (5000)",
+      "silhouette": -0.023,
+      "rf_acc": 0.503
+    },
+    {
+      "dataset": "v3 (1150)",
+      "silhouette": 0.033,
+      "rf_acc": 0.526
+    }
+  ],
+  "tiles_separabilidad_ext": [
+    {
+      "dataset": "rescate-1500",
+      "n_feats": 8,
+      "silhouette_ext": 0.055,
+      "rf_acc_ext": 0.844
+    },
+    {
+      "dataset": "originales (5000)",
+      "n_feats": 8,
+      "silhouette_ext": -0.01,
+      "rf_acc_ext": 0.584
+    },
+    {
+      "dataset": "v3 (1150)",
+      "n_feats": 8,
+      "silhouette_ext": 0.01,
+      "rf_acc_ext": 0.63
+    }
+  ],
+  "rescate_1500": {
+    "n_total": 1500,
+    "n_por_clase": {
+      "contaminacion_alta_NO2": 300,
+      "contaminacion_alta_SO2": 300,
+      "ozono_anomalo": 300,
+      "vegetacion_densa": 300,
+      "suelo_urbano": 300
+    },
+    "fechas_unicas": 75,
+    "pct_cerca_dagma": 0.03866666666666667
+  }
+}

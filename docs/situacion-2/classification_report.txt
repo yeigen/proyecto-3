@@ -1,0 +1,13 @@
+<Figure size 900x700 with 1 Axes>
+                        precision    recall  f1-score   support
+
+contaminacion_alta_NO2     0.6667    0.6222    0.6437        45
+contaminacion_alta_SO2     0.4127    0.5778    0.4815        45
+         ozono_anomalo     0.4444    0.2667    0.3333        45
+          suelo_urbano     0.9286    0.8667    0.8966        45
+      vegetacion_densa     0.8235    0.9333    0.8750        45
+
+              accuracy                         0.6533       225
+             macro avg     0.6552    0.6533    0.6460       225
+          weighted avg     0.6552    0.6533    0.6460       225
+

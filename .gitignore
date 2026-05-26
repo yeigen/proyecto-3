@@ -11,7 +11,8 @@ csv/dagma/
 data/hf-cache/
 data/tiles/rescate-1500/tiles_train.npz
 data/tiles/rescate-1500/*.npz.bak
-**/embeddings_sit3.npz
+data/modelo-sit2/
+data/tiles/comparacion/
 **/embeddings_progreso.npz
 *.zarr/
 tiles/data/
@@ -20,3 +21,7 @@ tiles/data/
 .understand-anything/
 .claude
 superpowers/
+# Sit 3 npz (descargable de Kaggle)
+data/sit3/embeddings_sit3.npz
+embeddings/
+modelo-sit2/

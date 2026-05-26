@@ -1,0 +1,102 @@
+[
+  {
+    "id": "base_aerea",
+    "nombre": "base aerea",
+    "lat": 3.45713,
+    "lon": -76.5023,
+    "contaminantes": [
+      "O3",
+      "SO2"
+    ],
+    "o3_avg": 11.19,
+    "so2_avg": 5.96
+  },
+  {
+    "id": "canaveralejo",
+    "nombre": "canaveralejo",
+    "lat": 3.4111,
+    "lon": -76.5444,
+    "contaminantes": [
+      "SO2"
+    ],
+    "so2_avg": 1.07
+  },
+  {
+    "id": "compartir",
+    "nombre": "compartir",
+    "lat": 3.4258,
+    "lon": -76.4741,
+    "contaminantes": [
+      "O3"
+    ],
+    "o3_avg": 14.98
+  },
+  {
+    "id": "era_-_obrero",
+    "nombre": "era - obrero",
+    "lat": 3.4525,
+    "lon": -76.5222,
+    "contaminantes": [
+      "O3"
+    ],
+    "o3_avg": 9.81
+  },
+  {
+    "id": "ermita",
+    "nombre": "ermita",
+    "lat": 3.4533,
+    "lon": -76.5311,
+    "contaminantes": [
+      "SO2"
+    ],
+    "so2_avg": 3.19
+  },
+  {
+    "id": "estacion_yumbo",
+    "nombre": "estacion yumbo",
+    "lat": 3.57908,
+    "lon": -76.48956,
+    "contaminantes": [
+      "NO2",
+      "O3",
+      "SO2"
+    ],
+    "no2_avg": 8.69,
+    "o3_avg": 11.5,
+    "so2_avg": 5.54
+  },
+  {
+    "id": "flora",
+    "nombre": "flora",
+    "lat": 3.4792,
+    "lon": -76.5072,
+    "contaminantes": [
+      "O3",
+      "SO2"
+    ],
+    "o3_avg": 6.71,
+    "so2_avg": 2.43
+  },
+  {
+    "id": "pance",
+    "nombre": "pance",
+    "lat": 3.3214,
+    "lon": -76.5333,
+    "contaminantes": [
+      "O3"
+    ],
+    "o3_avg": 12.71
+  },
+  {
+    "id": "univalle",
+    "nombre": "univalle",
+    "lat": 3.3768,
+    "lon": -76.5336,
+    "contaminantes": [
+      "NO2",
+      "O3"
+    ],
+    "no2_avg": 10.13,
+    "o3_avg": 15.65
+  }
+]

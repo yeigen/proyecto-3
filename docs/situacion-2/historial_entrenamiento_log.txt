@@ -1,0 +1,89 @@
+Epoca 1/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 01 | loss=2.2896 | val_loss=2.0856 | R@1=0.3289 | R@1_fusion=0.3422 | beta=0.15 | R@5=0.7378 | sparsity=0.5037 | mse=0.1595
+
+Epoca 2/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 02 | loss=1.8913 | val_loss=1.8357 | R@1=0.4178 | R@1_fusion=0.4178 | beta=0.00 | R@5=0.7911 | sparsity=0.6476 | mse=0.0393
+
+Epoca 3/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 03 | loss=1.8378 | val_loss=1.7738 | R@1=0.4044 | R@1_fusion=0.4133 | beta=0.15 | R@5=0.7067 | sparsity=0.7113 | mse=0.0190
+
+Epoca 4/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 04 | loss=1.7327 | val_loss=1.7054 | R@1=0.4756 | R@1_fusion=0.4933 | beta=0.15 | R@5=0.8311 | sparsity=0.7360 | mse=0.0248
+
+Epoca 5/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 05 | loss=1.6546 | val_loss=1.9448 | R@1=0.4267 | R@1_fusion=0.4267 | beta=0.00 | R@5=0.7556 | sparsity=0.7678 | mse=0.0184
+
+Epoca 6/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 06 | loss=1.6842 | val_loss=1.6124 | R@1=0.4756 | R@1_fusion=0.4756 | beta=0.00 | R@5=0.7733 | sparsity=0.7718 | mse=0.0094
+
+Epoca 7/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 07 | loss=1.5587 | val_loss=1.5098 | R@1=0.4978 | R@1_fusion=0.5111 | beta=0.15 | R@5=0.8533 | sparsity=0.7573 | mse=0.0093
+
+Epoca 8/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 08 | loss=1.4803 | val_loss=1.5274 | R@1=0.5333 | R@1_fusion=0.5333 | beta=0.00 | R@5=0.8800 | sparsity=0.7773 | mse=0.0099
+
+Epoca 9/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 09 | loss=1.4337 | val_loss=1.3498 | R@1=0.5644 | R@1_fusion=0.5644 | beta=0.00 | R@5=0.8622 | sparsity=0.7672 | mse=0.0108
+
+Epoca 10/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 10 | loss=1.3964 | val_loss=1.4291 | R@1=0.5422 | R@1_fusion=0.5511 | beta=0.25 | R@5=0.8311 | sparsity=0.7822 | mse=0.0098
+
+Epoca 11/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 11 | loss=1.2998 | val_loss=1.3264 | R@1=0.6044 | R@1_fusion=0.6044 | beta=0.00 | R@5=0.8667 | sparsity=0.7816 | mse=0.0095
+
+Epoca 12/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 12 | loss=1.3603 | val_loss=1.3527 | R@1=0.5378 | R@1_fusion=0.5778 | beta=0.35 | R@5=0.9022 | sparsity=0.7973 | mse=0.0124
+
+Epoca 13/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 13 | loss=1.2869 | val_loss=1.5261 | R@1=0.5467 | R@1_fusion=0.5911 | beta=0.35 | R@5=0.7600 | sparsity=0.7948 | mse=0.0104
+
+Epoca 14/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 14 | loss=1.2446 | val_loss=1.5124 | R@1=0.5600 | R@1_fusion=0.5600 | beta=0.00 | R@5=0.7867 | sparsity=0.7933 | mse=0.0095
+
+Epoca 15/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 15 | loss=1.1820 | val_loss=1.1859 | R@1=0.6089 | R@1_fusion=0.6133 | beta=0.25 | R@5=0.8844 | sparsity=0.8015 | mse=0.0095
+
+Epoca 16/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 16 | loss=1.1240 | val_loss=1.2254 | R@1=0.6089 | R@1_fusion=0.6089 | beta=0.00 | R@5=0.8889 | sparsity=0.7919 | mse=0.0098
+
+Epoca 17/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 17 | loss=1.0638 | val_loss=1.1996 | R@1=0.6356 | R@1_fusion=0.6533 | beta=0.25 | R@5=0.8667 | sparsity=0.7889 | mse=0.0097
+
+Epoca 18/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 18 | loss=1.0491 | val_loss=1.2244 | R@1=0.6311 | R@1_fusion=0.6311 | beta=0.00 | R@5=0.8800 | sparsity=0.7913 | mse=0.0096
+
+Epoca 19/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 19 | loss=1.0428 | val_loss=1.1512 | R@1=0.6444 | R@1_fusion=0.6444 | beta=0.00 | R@5=0.8844 | sparsity=0.7927 | mse=0.0095
+
+Epoca 20/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 20 | loss=0.9991 | val_loss=1.0847 | R@1=0.6444 | R@1_fusion=0.6444 | beta=0.00 | R@5=0.9244 | sparsity=0.7953 | mse=0.0094
+
+Epoca 21/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 21 | loss=0.9560 | val_loss=1.0770 | R@1=0.6178 | R@1_fusion=0.6356 | beta=0.15 | R@5=0.9156 | sparsity=0.7930 | mse=0.0095
+
+Epoca 22/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 22 | loss=0.9630 | val_loss=1.1447 | R@1=0.6267 | R@1_fusion=0.6667 | beta=0.25 | R@5=0.9067 | sparsity=0.7941 | mse=0.0097
+
+Epoca 23/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 23 | loss=0.9115 | val_loss=1.1169 | R@1=0.6267 | R@1_fusion=0.6267 | beta=0.00 | R@5=0.9244 | sparsity=0.7963 | mse=0.0095
+
+Epoca 24/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 24 | loss=0.8661 | val_loss=1.0660 | R@1=0.6444 | R@1_fusion=0.6578 | beta=0.25 | R@5=0.9200 | sparsity=0.7973 | mse=0.0097
+
+Epoca 25/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 25 | loss=0.8547 | val_loss=1.1036 | R@1=0.6133 | R@1_fusion=0.6400 | beta=0.35 | R@5=0.8844 | sparsity=0.7949 | mse=0.0103
+
+Epoca 26/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 26 | loss=0.8411 | val_loss=1.0917 | R@1=0.6444 | R@1_fusion=0.6756 | beta=0.35 | R@5=0.8933 | sparsity=0.7915 | mse=0.0098
+
+Epoca 27/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 27 | loss=0.8352 | val_loss=1.0872 | R@1=0.6533 | R@1_fusion=0.6622 | beta=0.35 | R@5=0.9111 | sparsity=0.7920 | mse=0.0099
+
+Epoca 28/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 28 | loss=0.8187 | val_loss=1.0980 | R@1=0.6444 | R@1_fusion=0.6756 | beta=0.25 | R@5=0.9067 | sparsity=0.7921 | mse=0.0098
+
+Epoca 29/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 29 | loss=0.8110 | val_loss=1.0872 | R@1=0.6222 | R@1_fusion=0.6622 | beta=0.35 | R@5=0.9156 | sparsity=0.7924 | mse=0.0099
+
+Epoca 30/30:   0%|          | 0/32 [00:00<?, ?it/s]
+Epoca 30 | loss=0.8001 | val_loss=1.0863 | R@1=0.6222 | R@1_fusion=0.6667 | beta=0.35 | R@5=0.9156 | sparsity=0.7925 | mse=0.0099
