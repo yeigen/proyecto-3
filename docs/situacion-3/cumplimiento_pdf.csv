@@ -1,0 +1,8 @@
+componente,requisito PDF,evidencia,cumple
+Sit 1 panel cloud,5 años de imágenes satelitales (2021-2026),Panel Zarr S2 2021-01 → 2026-01,True
+Sit 1 BBox,área metropolitana Cali + Yumbo + caña norte,"BBox (-76.65, 3.3, -76.3, 3.65) cubre Cali + Yumbo + corredor industrial",True
+Sit 2 dataset,"≥1000 pares tile 64×64 + caption ES, ≥5 clases","1500 tiles × 13 bandas, 5 clases balanceadas 300/clase",True
+Sit 2 split estratificado,70/15/15 SEED=42,Aplicado en notebook 02-clip-definitivo Bloque 2,True
+Sit 3 cobertura espacial,predicción en cualquier punto Cali,"BBox (-76.65, 3.3, -76.3, 3.65), 10/10 estaciones DAGMA dentro",True
+Sit 3 LOO-CV ground truth,validar contra estaciones DAGMA,"DAGMA 2021-2024, 9 estaciones, O3 n=7, SO2 n=5, NO2 n=2",True
+Sit 3 LOO-CV NO2,RMSE LOO-CV NO2 ≤ 8 µg/m³,"n=2 estaciones (univalle, yumbo) → LOO-CV kriging inejecutable",Limitación física documentada

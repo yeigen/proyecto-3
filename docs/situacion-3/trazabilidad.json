@@ -1,0 +1,59 @@
+{
+  "fecha_verificacion": "2026-05-26T15:30:56.923064+00:00",
+  "bbox_config": [
+    -76.65,
+    3.3,
+    -76.3,
+    3.65
+  ],
+  "bbox_manifest_desactualizado": [
+    -76.6,
+    3.3,
+    -76.4,
+    3.55
+  ],
+  "estaciones_dagma": {
+    "total": 10,
+    "dentro_bbox_config": 10,
+    "dentro_bbox_manifest_viejo": 9
+  },
+  "tiles_rescate_1500": {
+    "total": 1500,
+    "dentro_bbox_config": 1500,
+    "rango_temporal": [
+      "2021-01-16 00:00:00",
+      "2025-12-31 00:00:00"
+    ],
+    "fechas_unicas": 75,
+    "distribucion_anios": {
+      "2021": 164,
+      "2022": 253,
+      "2023": 262,
+      "2024": 662,
+      "2025": 159
+    }
+  },
+  "dagma_limpio": {
+    "filas_total": 300025,
+    "estaciones": 9,
+    "rango_temporal": [
+      "2021-01-01 00:00:00",
+      "2024-12-31 23:00:00"
+    ],
+    "cobertura_anios": 4.0,
+    "estaciones_por_gas": {
+      "no2": 2,
+      "o3": 7,
+      "so2": 5
+    }
+  },
+  "overlap_sit3": {
+    "tiles_2025_descartados": 159,
+    "tiles_usables_sit3": 1341
+  },
+  "conclusiones": {
+    "bbox_continuidad": "OK — todas las estaciones y tiles dentro del BBox del config",
+    "temporal_continuidad": "OK — overlap 2021-2024 suficiente para LOO-CV (4 años)",
+    "limitacion_no2": "n=2 estaciones DAGMA con NO2 → LOO-CV kriging matemáticamente inejecutable"
+  }
+}
