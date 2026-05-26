@@ -1,31 +1,26 @@
-FROM python:3.12-slim AS builder
+# Dockerfile multi-stage para HuggingFace Spaces (un solo contenedor)
+# Stage 1: build del frontend React/Vite
+FROM node:20-alpine AS frontend
+WORKDIR /fe
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gcc g++ && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dirs uv
-
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev --frozen
-
+# Stage 2: backend FastAPI + frontend estático
 FROM python:3.12-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgomp1 && \
-    rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
-COPY --from=builder /app/.venv .venv/
+
+RUN pip install --no-cache-dir fastapi "uvicorn[standard]" pandas pyarrow
+
 COPY backend/ backend/
-COPY dagma/ dagma/
-COPY checkpoint-kaggle/ checkpoint-kaggle/
-COPY fuentes-proyecto-3/ fuentes-proyecto-3/
+COPY data/ data/
+COPY --from=frontend /fe/dist frontend/dist
 
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app:$PYTHONPATH"
+ENV GEOVISION_DATA=/app/data
+ENV GEOVISION_FRONTEND=/app/frontend/dist
+ENV PYTHONPATH=/app
 
-EXPOSE 8000
+EXPOSE 7860
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "7860"]

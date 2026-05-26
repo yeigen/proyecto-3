@@ -1,5 +1,6 @@
 import logging
 import uvicorn
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -71,7 +72,11 @@ app.add_middleware(
 app.include_router(predict.router)
 app.include_router(validate.router)
 app.include_router(grids.router)
-app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+
+from backend import config
+_static_dir = config.DATA.parent / "backend" / "static"
+if (Path("backend/static")).exists():
+    app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 
 @app.get("/api/estaciones")
@@ -104,9 +109,7 @@ async def health():
     return {"status": "ok", "version": "1.0.0"}
 
 
-@app.get("/", include_in_schema=False)
-async def home():
-    return HTMLResponse("""<!DOCTYPE html>
+_FRONTEND_HOME = """<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><title>GeoVision-CLIP</title>
 <style>
@@ -152,7 +155,18 @@ async def home():
 <p style="margin-top:2rem;color:#94a3b8;font-size:0.9rem">
   GeoVision-CLIP v1.0.0 &middot; Universidad Autonoma de Occidente &middot; 2026
 </p>
-</body></html>""")
+</body></html>"""
+
+
+# Servir el frontend React (SPA) si el build existe; si no, página informativa.
+if config.FRONTEND_DIST.exists():
+    app.mount("/", StaticFiles(directory=str(config.FRONTEND_DIST), html=True), name="frontend")
+    logger.info(f"Frontend servido desde {config.FRONTEND_DIST}")
+else:
+    @app.get("/", include_in_schema=False)
+    async def home():
+        return HTMLResponse(_FRONTEND_HOME)
+    logger.info("Frontend dist no encontrado, sirviendo página informativa")
 
 
 if __name__ == "__main__":

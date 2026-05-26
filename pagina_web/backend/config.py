@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent
@@ -5,8 +6,11 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 BBOX = [-76.65, 3.30, -76.30, 3.65]
 CENTRO = [3.45, -76.53]
 
-# Datos locales del proyecto (rama release/sit-1-2-3-final)
-DATA = RAIZ / "data"
+# Datos: variable de entorno GEOVISION_DATA (contenedor HF Spaces) o data/ local
+DATA = Path(os.getenv("GEOVISION_DATA", str(RAIZ / "data")))
+
+# Frontend estático (build de Vite) — servido por el backend en despliegue
+FRONTEND_DIST = Path(os.getenv("GEOVISION_FRONTEND", str(Path(__file__).resolve().parent.parent / "frontend" / "dist")))
 
 # Sit 3 — artefactos pre-computados (frontend-ready)
 SIT3 = DATA / "sit3" / "frontend_data"
