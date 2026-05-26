@@ -1,0 +1,10 @@
+{
+  "title": "GeoVision Tiles Rescate 1500",
+  "id": "edwardsx/geovision-tiles-rescate-1500",
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "description": "1500 tiles Sentinel-2 64x64 13 bandas con criterio estricto de pureza por clase. 300 por clase x 5 clases. Captions ES sin leakage. RF tabular 83.6% accuracy."
+}

@@ -6,7 +6,17 @@ hugging-face/cache/
 hugging-face/staging/
 __pycache__/
 csv/dagma/
-data/
+
+# Datos grandes (regenerables o descargables)
+data/hf-cache/
+data/tiles/rescate-1500/tiles_train.npz
+data/tiles/rescate-1500/*.npz.bak
+**/embeddings_sit3.npz
+**/embeddings_progreso.npz
+*.zarr/
+tiles/data/
+
+# Otros
 .understand-anything/
 .claude
 superpowers/
