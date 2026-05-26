@@ -5,21 +5,24 @@ RAIZ = Path(__file__).resolve().parent.parent.parent
 BBOX = [-76.65, 3.30, -76.30, 3.65]
 CENTRO = [3.45, -76.53]
 
-BASE_DATOS = RAIZ / "fuentes-proyecto-3"
+# Datos locales del proyecto (rama release/sit-1-2-3-final)
+DATA = RAIZ / "data"
 
-BASE_TILES = BASE_DATOS / "GeoVision Tiles Sit 2"
+# Sit 3 — artefactos pre-computados (frontend-ready)
+SIT3 = DATA / "sit3" / "frontend_data"
+GRIDS_JSON = SIT3 / "grids_prediccion.json"
+OVERLAYS_DIR = SIT3 / "overlays"
+ESTACIONES_JSON = SIT3 / "estaciones.json"
+LISA_JSON = SIT3 / "lisa.json"
+VARIOGRAMAS_JSON = SIT3 / "variogramas.json"
+PERFILES_JSON = SIT3 / "perfiles_kmeans.json"
+LOOCV_JSON = SIT3 / "loocv.json"
+KPIS_JSON = SIT3 / "kpis.json"
 
-TILES_NPZ = BASE_TILES / "tiles_train.npz"
-TILES_META = BASE_TILES / "tiles_meta.parquet"
-
-CHECKPOINT_CLIP = BASE_DATOS / "geovision-clip-modelo-v2v" / "clip_finetuned_best.pt"
-METRICS_CLIP = BASE_DATOS / "geovision-clip-modelo-v2v" / "metrics.json"
-BAND_STATS = Path(__file__).resolve().parent / "data" / "band_stats.json"
-
-RUTA_DAGMA = RAIZ / "dagma" / "dagma_cvc_horario_raw.parquet"
-RUTA_ESTACIONES = RAIZ / "dagma" / "estaciones_metadata.csv"
-
-KAGGLE_MODIS = "edwardsx/modis-v2-panel"
+# DAGMA limpio (ground truth) + tiles Sit 2
+RUTA_DAGMA = DATA / "dagma" / "df_dagma_unificado_coordenadas_limpias.parquet"
+RUTA_ESTACIONES = DATA / "dagma" / "estaciones_metadata.csv"
+TILES_META = DATA / "tiles" / "rescate-1500" / "tiles_meta.parquet"
 
 CONTAMINANTES = ["NO2", "SO2", "O3"]
 HORIZONTES = ["T+1", "T+3", "T+7"]
@@ -28,7 +31,8 @@ CLASES_CLIP = [
     "ozono_anomalo", "vegetacion_densa", "suelo_urbano",
 ]
 
-INDICES_BANDAS_S2 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+# Gases con mapa de Kriging (NO2 excluido: solo 2 estaciones DAGMA)
+GASES_CON_MAPA = ["SO2", "O3"]
 
 ESCALAS_COLOR = {
     "NO2": ["#fef2f2", "#fee2e2", "#fecaca", "#fca5a5",

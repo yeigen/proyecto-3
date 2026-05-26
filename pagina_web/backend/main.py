@@ -8,8 +8,7 @@ from fastapi.responses import HTMLResponse
 
 from backend.api import predict, validate, grids
 from backend.data import estaciones, tiles
-from backend.modelo.clip_sae import cargar_modelo
-from backend.estado import modelo_global, DISPOSITIVO
+from backend.estado import cargar_artefactos
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,16 +19,11 @@ logger = logging.getLogger("backend")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"Iniciando servidor (device: {DISPOSITIVO})")
-    visual, fusion, band_mean, band_std = cargar_modelo(DISPOSITIVO)
-    modelo_global["visual"] = visual
-    modelo_global["fusion"] = fusion
-    modelo_global["band_mean"] = band_mean
-    modelo_global["band_std"] = band_std
-    logger.info("Modelo CLIP cargado en memoria")
+    logger.info("Iniciando servidor (backend estático Sit 3)")
+    cargar_artefactos()
+    logger.info("Artefactos Sit 3 cargados en memoria")
     yield
-    modelo_global.clear()
-    logger.info("Modelo descargado")
+    logger.info("Servidor detenido")
 
 
 app = FastAPI(

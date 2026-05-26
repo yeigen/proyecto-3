@@ -1,5 +1,8 @@
+"""Endpoint de validación: LOO-CV, KPIs, LISA, variogramas, perfiles tipológicos."""
+
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from backend.estado import datos
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/validate", tags=["validacion"])
@@ -7,12 +10,26 @@ router = APIRouter(prefix="/api/validate", tags=["validacion"])
 
 @router.get("")
 async def validar_loo():
-    raise HTTPException(
-        status_code=501,
-        detail=(
-            "Validaci\u00f3n LOO-CV no disponible. "
-            "Depende de /api/predict para generar predicciones. "
-            "El c\u00f3digo de Kriging y c\u00e1lculo de RMSE/MAE/R\u00b2 est\u00e1 listo en "
-            "backend/modelo/kriging.py y requiere datos del pipeline completo."
-        ),
-    )
+    """Tabla LOO-CV por gas × horizonte + KPIs Sit 3."""
+    return {
+        "loocv": datos.get("loocv", []),
+        "kpis": datos.get("kpis", []),
+    }
+
+
+@router.get("/lisa")
+async def get_lisa():
+    """Clusters LISA (HH/LL/HL/LH) por contaminante."""
+    return datos.get("lisa", {})
+
+
+@router.get("/variogramas")
+async def get_variogramas():
+    """Parámetros del variograma (nugget/sill/range) por contaminante."""
+    return datos.get("variogramas", {})
+
+
+@router.get("/perfiles")
+async def get_perfiles():
+    """Perfiles tipológicos K-Means de zonas crónicas."""
+    return datos.get("perfiles", {})
