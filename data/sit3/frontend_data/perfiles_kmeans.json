@@ -1,30 +1,30 @@
 {
   "perfil_0": {
-    "SO2": 2.914,
-    "O3": 13.438,
-    "n_celdas": 368,
-    "pct_area": 7.3,
-    "interpretacion": "zona cr\u00f3nica alta"
+    "SO2": 2.794,
+    "O3": 9.776,
+    "n_celdas": 1047,
+    "pct_area": 20.8,
+    "interpretacion": "zona baja-media"
   },
   "perfil_1": {
-    "SO2": 2.917,
-    "O3": 11.454,
-    "n_celdas": 962,
-    "pct_area": 19.1,
-    "interpretacion": "zona baja-media"
-  },
-  "perfil_2": {
-    "SO2": 3.229,
-    "O3": 11.345,
-    "n_celdas": 2968,
-    "pct_area": 58.9,
+    "SO2": 2.778,
+    "O3": 9.894,
+    "n_celdas": 2526,
+    "pct_area": 50.1,
     "interpretacion": "zona cr\u00f3nica alta"
   },
-  "perfil_3": {
-    "SO2": 3.439,
-    "O3": 10.074,
-    "n_celdas": 743,
-    "pct_area": 14.7,
+  "perfil_2": {
+    "SO2": 2.822,
+    "O3": 9.683,
+    "n_celdas": 464,
+    "pct_area": 9.2,
     "interpretacion": "zona baja-media"
+  },
+  "perfil_3": {
+    "SO2": 2.748,
+    "O3": 9.966,
+    "n_celdas": 1004,
+    "pct_area": 19.9,
+    "interpretacion": "zona cr\u00f3nica alta"
   }
 }

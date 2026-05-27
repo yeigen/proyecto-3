@@ -19,6 +19,7 @@ tiles/data/
 data/sit3/embeddings_sit3.npz
 embeddings/
 modelo-sit2/
+modelo/
 /home/yeigen/Documents/proyecto-3/pagina_web/frontend/tsconfig.tsbuildinfo
 
 # Frontend (rama-fronted-prueba)
