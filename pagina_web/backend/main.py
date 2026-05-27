@@ -104,6 +104,11 @@ async def get_tiles_resumen():
     return tiles.resumen_clases()
 
 
+@app.get("/api/cobertura")
+async def get_cobertura_punto(lat: float, lon: float, radio_km: float = 0.7):
+    return tiles.cobertura_en_punto(lat, lon, radio_km)
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "1.0.0"}

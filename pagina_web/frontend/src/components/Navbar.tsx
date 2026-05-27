@@ -1,12 +1,10 @@
 import { Link, useLocation } from 'react-router-dom'
+import { Sun, Moon, Globe2 } from 'lucide-react'
+import { useTheme } from '../theme/ThemeContext'
 
-interface NavbarProps {
-  darkMode: boolean
-  toggleDarkMode: () => void
-}
-
-export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
+export default function Navbar() {
   const { pathname } = useLocation()
+  const { darkMode, toggleDarkMode } = useTheme()
 
   const links = [
     { to: '/', label: 'Inicio' },
@@ -15,9 +13,10 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
   ]
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/20 dark:bg-black/40 border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-blue-950/30 dark:bg-slate-950/50 border-b border-cyan-400/10">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="text-lg font-bold tracking-tight text-emerald-400">
+        <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+          <Globe2 size={20} className="text-cyan-300" />
           GeoVision-CLIP
         </Link>
         <div className="flex items-center gap-6">
@@ -27,7 +26,7 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
               to={l.to}
               className={`text-sm transition-colors ${
                 pathname === l.to
-                  ? 'text-emerald-400 font-semibold'
+                  ? 'text-cyan-300 font-semibold'
                   : 'text-slate-300 hover:text-white'
               }`}
             >
@@ -36,9 +35,11 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
           ))}
           <button
             onClick={toggleDarkMode}
-            className="ml-2 text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label={darkMode ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="ml-2 inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-slate-100"
           >
-            {darkMode ? '☀️ Claro' : '🌙 Oscuro'}
+            {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+            {darkMode ? 'Claro' : 'Oscuro'}
           </button>
         </div>
       </div>

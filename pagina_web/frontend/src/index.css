@@ -6,3 +6,113 @@
   width: 100%;
   height: 100%;
 }
+
+/* ----- Modo oscuro consistente para controles/popup de Leaflet ----- */
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+.dark .leaflet-popup-content-wrapper hr {
+  border-top-color: #334155 !important;
+}
+.dark .leaflet-bar a,
+.dark .leaflet-control-zoom a {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+.dark .leaflet-bar a:hover {
+  background: #334155;
+}
+.dark .leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #94a3b8 !important;
+}
+.dark .leaflet-control-attribution a {
+  color: #67e8f9 !important;
+}
+
+/* ----- Nubes decorativas (Clouds.tsx) ----- */
+.cloud {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0));
+  filter: blur(10px);
+  opacity: 0.5;
+  will-change: transform;
+}
+.cloud-a { top: 14%; left: -20%; width: 320px; height: 110px; animation: clouds-drift 46s linear infinite; }
+.cloud-b { top: 42%; left: -30%; width: 240px; height: 90px;  opacity: 0.4; animation: clouds-drift 62s linear infinite; animation-delay: -18s; }
+.cloud-c { top: 68%; left: -25%; width: 400px; height: 130px; opacity: 0.35; animation: clouds-drift 78s linear infinite; animation-delay: -40s; }
+
+@keyframes clouds-drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(160vw); }
+}
+
+/* ----- Transición de planeta (PlanetIntro.tsx) ----- */
+.planet-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 38%, #0b2545 0%, #061427 58%, #02060d 100%);
+}
+.planet-intro.is-leaving { animation: intro-fade 0.8s ease forwards; }
+
+.planet-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: intro-zoom 0.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.planet-intro.is-leaving .planet-stage { animation: intro-zoomout 0.8s ease forwards; }
+
+.planet-stage svg {
+  filter: drop-shadow(0 0 50px rgba(56, 189, 248, 0.45));
+}
+.planet-clouds {
+  transform-origin: 100px 100px;
+  animation: planet-spin 26s linear infinite;
+}
+.planet-title {
+  margin-top: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 1.6rem;
+  background: linear-gradient(90deg, #67e8f9, #6ee7b7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.planet-sub { color: #94a3b8; font-size: 0.85rem; }
+.planet-skip {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.planet-skip:hover { background: rgba(255, 255, 255, 0.18); }
+
+@keyframes planet-spin { to { transform: rotate(360deg); } }
+@keyframes intro-zoom { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes intro-zoomout { to { transform: scale(2.4); opacity: 0; } }
+@keyframes intro-fade { to { opacity: 0; } }
+
+/* Accesibilidad: reduce el movimiento si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+  .cloud,
+  .planet-clouds { animation: none; }
+  .planet-stage,
+  .planet-intro.is-leaving .planet-stage { animation: none; }
+}

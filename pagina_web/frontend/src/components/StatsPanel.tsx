@@ -1,11 +1,23 @@
+import { Trees, Building2, Factory, Sun, Car, type LucideIcon } from 'lucide-react'
 import type { Stats } from '../types'
 
 interface Props {
   stats: Stats
   contaminanteActivo: string
+  coberturaGlobal?: Record<string, number>
 }
 
-export default function StatsPanel({ stats, contaminanteActivo }: Props) {
+const COBERTURA_META: Record<string, { label: string; color: string; icon: LucideIcon }> = {
+  vegetacion_densa: { label: 'Vegetación densa', color: '#16a34a', icon: Trees },
+  suelo_urbano: { label: 'Suelo urbano', color: '#b45309', icon: Building2 },
+  contaminacion_alta_NO2: { label: 'Contaminación NO₂', color: '#dc2626', icon: Car },
+  contaminacion_alta_SO2: { label: 'Contaminación SO₂', color: '#b91c1c', icon: Factory },
+  ozono_anomalo: { label: 'Ozono anómalo', color: '#d97706', icon: Sun },
+}
+
+export default function StatsPanel({ stats, contaminanteActivo, coberturaGlobal = {} }: Props) {
+  const totalCob = Object.values(coberturaGlobal).reduce((a, b) => a + b, 0)
+
   return (
     <div className="w-64 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 p-4 overflow-y-auto flex flex-col gap-4 text-sm">
       <div>
@@ -22,6 +34,36 @@ export default function StatsPanel({ stats, contaminanteActivo }: Props) {
           </div>
         ))}
       </div>
+
+      {totalCob > 0 && (
+        <div>
+          <p className="font-semibold text-xs uppercase tracking-wider text-slate-500 mb-2">
+            Cobertura del territorio
+          </p>
+          <p className="text-[0.68rem] text-slate-400 mb-2 -mt-1">Qué ve el modelo en los {totalCob.toLocaleString()} tiles</p>
+          {Object.entries(coberturaGlobal)
+            .sort((a, b) => b[1] - a[1])
+            .map(([clase, n]) => {
+              const meta = COBERTURA_META[clase] || { label: clase, color: '#64748b', icon: Trees }
+              const Icon = meta.icon
+              const pct = (n / totalCob) * 100
+              return (
+                <div key={clase} className="py-1">
+                  <div className="flex items-center justify-between text-xs mb-0.5">
+                    <span className="flex items-center gap-1.5">
+                      <Icon size={13} color={meta.color} />
+                      {meta.label}
+                    </span>
+                    <span className="text-slate-500">{pct.toFixed(0)}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: meta.color }} />
+                  </div>
+                </div>
+              )
+            })}
+        </div>
+      )}
 
       <div>
         <p className="font-semibold text-xs uppercase tracking-wider text-slate-500 mb-2">

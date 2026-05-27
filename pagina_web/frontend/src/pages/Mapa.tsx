@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import MapaCali, { type OverlayInfo } from '../components/MapaCali'
 import ControlPanel from '../components/ControlPanel'
 import StatsPanel from '../components/StatsPanel'
+import PlanetIntro from '../components/PlanetIntro'
 import { fuentes, CONTAMINANTES, HORIZONTES, GASES_CON_MAPA } from '../data/constantes'
-import type { Estacion, Stats, TileClip } from '../types'
+import type { Estacion, Stats, TileClip, Cobertura } from '../types'
 
 const API = '/api'
 
@@ -21,10 +22,15 @@ export default function Mapa() {
   const [stats, setStats] = useState<Stats | null>(null)
 
   const [prediccion, setPrediccion] = useState<any>(null)
+  const [cobertura, setCobertura] = useState<Cobertura | null>(null)
+  const [coberturaGlobal, setCoberturaGlobal] = useState<Record<string, number>>({})
   const [cargando, setCargando] = useState(false)
   const [puntoClick, setPuntoClick] = useState<{ lat: number; lon: number } | null>(null)
 
   const [boundsMapa, setBoundsMapa] = useState<[[number, number], [number, number]] | null>(null)
+
+  // Intro de planeta: se reproduce una vez por sesión
+  const [mostrarIntro, setMostrarIntro] = useState(() => !sessionStorage.getItem('intro_visto'))
 
   useEffect(() => {
     fetch(`${API}/estaciones`)
@@ -79,6 +85,12 @@ export default function Mapa() {
         }
       })
       .catch(() => {})
+
+    // Resumen global de cobertura (% por clase) para el StatsPanel
+    fetch(`${API}/tiles-clip/resumen`)
+      .then(r => r.ok ? r.json() : null)
+      .then(res => { if (res && Object.keys(res).length) setCoberturaGlobal(res) })
+      .catch(() => {})
   }, [])
 
   // Cargar bounds del overlay al cambiar gas/horizonte
@@ -97,6 +109,14 @@ export default function Mapa() {
 
   const handleMapaClick = async (lat: number, lon: number) => {
     setPuntoClick({ lat, lon })
+
+    // Cobertura del suelo (qué zona ve el modelo) — independiente del gas
+    setCobertura(null)
+    fetch(`${API}/cobertura?lat=${lat}&lon=${lon}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(c => setCobertura(c))
+      .catch(() => setCobertura(null))
+
     if (!GASES_CON_MAPA.includes(contaminanteActivo)) {
       setPrediccion({ contaminante: contaminanteActivo, horizonte: horizonteActivo,
         error: 'NO₂ no tiene mapa de predicción (solo 2 estaciones DAGMA).' })
@@ -137,6 +157,9 @@ export default function Mapa() {
 
   return (
     <div className="pt-14 flex h-[calc(100vh-3.5rem)]">
+      {mostrarIntro && (
+        <PlanetIntro onDone={() => { sessionStorage.setItem('intro_visto', '1'); setMostrarIntro(false) }} />
+      )}
       <ControlPanel
         contaminanteActivo={contaminanteActivo}
         fuenteActiva={fuenteActiva}
@@ -165,6 +188,7 @@ export default function Mapa() {
           mostrarTiles={mostrarTiles}
           onMapaClick={handleMapaClick}
           prediccion={prediccion}
+          cobertura={cobertura}
           cargando={cargando}
           puntoClick={puntoClick}
           overlayGradiente={overlayGradiente}
@@ -172,7 +196,7 @@ export default function Mapa() {
         />
       </main>
 
-      {stats && <StatsPanel stats={stats} contaminanteActivo={contaminanteActivo} />}
+      {stats && <StatsPanel stats={stats} contaminanteActivo={contaminanteActivo} coberturaGlobal={coberturaGlobal} />}
     </div>
   )
 }

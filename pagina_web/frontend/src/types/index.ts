@@ -47,3 +47,16 @@ export interface CeldaGrid {
   valor: number
   varianza: number
 }
+
+export interface Cobertura {
+  lat: number
+  lon: number
+  radio_km: number
+  n_tiles: number
+  clase_dominante: string | null
+  etiqueta: string
+  descripcion: string
+  ndvi: number | null
+  ndbi: number | null
+  clases: Record<string, number>
+}
